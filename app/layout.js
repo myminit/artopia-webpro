@@ -24,14 +24,20 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Top Header */}
-        <HeadLogo />
+        {/* Fixed Top Header */}
+        <div className="fixed top-0 left-0 w-full h-[70px] z-50 bg-white shadow">
+          <HeadLogo />
+        </div>
 
-        {/* Sidebar + Page Content */}
-        <div className="flex">
-          <Navbar />
+        {/* Sidebar + Scrollable Main Content */}
+        <div className="flex pt-[70px] h-screen">
+          {/* Fixed Sidebar */}
+          <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+            <Navbar />
+          </div>
 
-          <main className="flex-1 bg-white p-6">
+          {/* Scrollable content with left padding to avoid overlapping sidebar */}
+          <main className="ml-72 flex-1 overflow-y-auto h-[calc(100vh-70px)] p-6 bg-white">
             {children}
           </main>
         </div>
