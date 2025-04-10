@@ -15,7 +15,6 @@ import Link from "next/link";
 const navItems = [
   { name: "Home", icon: HomeIcon, href: "/", active: true },
   { name: "Draw", icon: PencilIcon, href: "/draw" },
-  { name: "Gallery", icon: Squares2X2Icon, href: "/gallery" },
   { name: "Community", icon: GlobeAltIcon, href: "/community" },
   { name: "Upload", icon: ArrowUpTrayIcon, href: "/upload" },
   { name: "Account setting", icon: Cog6ToothIcon, href: "/settings" },
