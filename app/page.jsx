@@ -1,14 +1,11 @@
-import HeadLogo from "../components/headlogo";
-import Navbar from "../components/navbar";
-import Image from "next/image";
-import Link from "next/link";
 
-
-export default function Home() {
+export default function HomePage() {
   return (
-    <HeadLogo />
-    
-
-    
+    <div>
+      <h1 className="text-2xl font-bold mb-4">Welcome to Home</h1>
+      <p>This is your drawing app homepage!</p>
+    </div>
   );
 }
+
+
