@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import Image from "next/image";
 import { PhotoIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
@@ -10,6 +10,7 @@ import HeadLogo from "../../components/HeadLogo";
 export default function Upload() {
   const [postText, setPostText] = useState("");
   const [image, setImage] = useState(null);
+  const fileInputRef = useRef(null); // ใช้ ref เพื่อเชื่อมโยงกับ input
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -23,6 +24,10 @@ export default function Upload() {
     // logic อัปโหลดจริง
     console.log("โพสต์:", postText);
     console.log("รูป:", image);
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current.click(); // คลิก input เมื่อคลิกปุ่ม "Browse"
   };
 
   return (
@@ -39,7 +44,7 @@ export default function Upload() {
         </div>
 
         {/* Main Content */}
-        <main className="ml-72 flex-1 overflow-y-auto px-6 py-4  ">
+        <main className="ml-72 flex-1 overflow-y-auto px-6 py-4">
           <div className="py-2 mx-auto">
             <h1 className="text-4xl font-bold mb-6">Upload post</h1>
 
@@ -77,21 +82,21 @@ export default function Upload() {
                 </>
               )}
               <input
+                ref={fileInputRef} // เชื่อมโยงกับ ref
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="hidden"
-                id="fileUpload"
               />
-              <label htmlFor="fileUpload">
-                <button
-                  type="button"
-                  style={{ backgroundColor: "#29B3F1" }}
-                  className="mt-2 px-4 py-2 text-white rounded-full hover:opacity-90 transition"
-                >
-                  Browse
-                </button>
-              </label>
+              <button
+                type="button"
+                style={{ backgroundColor: "#29B3F1" }}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:opacity-90 transition inline-flex items-center gap-2"
+                onClick={handleBrowseClick} // เมื่อคลิกปุ่ม "Browse" จะเปิดไฟล์เลือก
+              >
+                <ArrowUpTrayIcon className="w-5 h-5" />
+                Browse
+              </button>
             </div>
 
             {/* Action Buttons */}
