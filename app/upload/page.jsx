@@ -41,7 +41,7 @@ export default function Upload() {
         {/* Main Content */}
         <main className="ml-72 flex-1 overflow-y-auto px-6 py-4  ">
           <div className="py-2 mx-auto">
-            <h1 className="text-3xl font-bold mb-6">Upload post</h1>
+            <h1 className="text-4xl font-bold mb-6">Upload post</h1>
 
             {/* Profile */}
             <div className="flex items-center gap-3 mb-4">
@@ -53,7 +53,7 @@ export default function Upload() {
 
             {/* Post Textarea */}
             <textarea
-              className="w-full p-6 border border-gray-300 rounded-md bg-gray-100 mb-4"
+              className="w-full p-8 border border-gray-300 rounded-md bg-gray-100 mb-4"
               placeholder="Write your post here"
               value={postText}
               onChange={(e) => setPostText(e.target.value)}
@@ -61,7 +61,7 @@ export default function Upload() {
             />
 
             {/* Image Upload */}
-            <div className="border border-gray-200 rounded-md p-10 flex flex-col items-center justify-center text-center mb-6">
+            <div className="border border-gray-200 rounded-md p-12 flex flex-col items-center justify-center text-center mb-6">
               {image ? (
                 <img
                   src={image}
@@ -86,9 +86,9 @@ export default function Upload() {
               <label htmlFor="fileUpload">
                 <button
                   type="button"
-                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition inline-flex items-center gap-2"
+                  style={{ backgroundColor: "#29B3F1" }}
+                  className="mt-2 px-4 py-2 text-white rounded-full hover:opacity-90 transition"
                 >
-                  <ArrowUpTrayIcon className="w-5 h-5" />
                   Browse
                 </button>
               </label>
@@ -107,7 +107,8 @@ export default function Upload() {
                 Cancel
               </button>
               <button
-                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition"
+                style={{ backgroundColor: "#29B3F1" }}
+                className="w-full text-white py-2 rounded-md hover:opacity-90 transition"
                 onClick={handleSubmit}
               >
                 Post
