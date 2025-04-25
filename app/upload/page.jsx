@@ -1,11 +1,10 @@
 "use client";
 import { useState, useRef } from "react";
 
-import Image from "next/image";
 import { PhotoIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import Navbar from "../../components/Navbar";
 import HeadLogo from "../../components/HeadLogo";
-
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function Upload() {
   const [postText, setPostText] = useState("");
@@ -66,13 +65,23 @@ export default function Upload() {
             />
 
             {/* Image Upload */}
-            <div className="border border-gray-200 rounded-md p-12 flex flex-col items-center justify-center text-center mb-6">
+            <div className="border border-gray-200 rounded-md p-12 flex flex-col items-center justify-center text-center mb-6 relative">
               {image ? (
-                <img
-                  src={image}
-                  alt="Uploaded"
-                  className="max-h-64 object-contain mb-4 rounded-md"
-                />
+                <div className="relative">
+                  <img
+                    src={image}
+                    alt="Uploaded"
+                    className="max-h-64 object-contain mb-4 rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setImage(null)}
+                    className="absolute top-2 right-2 text-gray-600 hover:text-red-500 transition"
+                    aria-label="Remove image"
+                  >
+                    <XMarkIcon className="h-6 w-6" />
+                  </button>
+                </div>
               ) : (
                 <>
                   <PhotoIcon className="w-18 h-18 mb-2 text-gray-400" />
@@ -82,7 +91,7 @@ export default function Upload() {
                 </>
               )}
               <input
-                ref={fileInputRef} // เชื่อมโยงกับ ref
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
@@ -92,7 +101,7 @@ export default function Upload() {
                 type="button"
                 style={{ backgroundColor: "#29B3F1" }}
                 className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:opacity-90 transition inline-flex items-center gap-2"
-                onClick={handleBrowseClick} // เมื่อคลิกปุ่ม "Browse" จะเปิดไฟล์เลือก
+                onClick={handleBrowseClick}
               >
                 <ArrowUpTrayIcon className="w-5 h-5" />
                 Browse
