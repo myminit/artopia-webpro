@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { CameraIcon } from "@heroicons/react/24/outline";
-import Navbar from "../../components/Navbar";
-import HeadLogo from "../../components/HeadLogo";
+import Navbar from "@/components/Navbar";
+import HeadLogo from "@/components/HeadLogo";
 
 export default function AccountSetting() {
   const [profileImage, setProfileImage] = useState("/default-profile.jpg");

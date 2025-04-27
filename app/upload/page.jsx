@@ -2,8 +2,8 @@
 import { useState, useRef } from "react";
 
 import { PhotoIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import Navbar from "../../components/Navbar";
-import HeadLogo from "../../components/HeadLogo";
+import Navbar from "@/components/Navbar";
+import HeadLogo from "@/components/HeadLogo";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function Upload() {

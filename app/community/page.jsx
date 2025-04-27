@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
-import Navbar from "../../components/Navbar";
-import HeadLogo from "../../components/HeadLogo";
+import Navbar from "@/components/Navbar";
+import HeadLogo from "@/components/HeadLogo";
 
 export default function Community() {
   const [posts, setPosts] = useState([]);

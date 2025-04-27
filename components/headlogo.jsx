@@ -1,5 +1,4 @@
-import logo from "/public/img/logo.png";
-import user from "/public/img/tin.png";
+
 import Image from "next/image";
 
 
@@ -8,7 +7,12 @@ export default function HeadLogo() {
     <header className="flex items-center justify-between px-8 py-4 bg-sky-400 shadow-sm">
       {/* Logo + Title */}
       <div className="flex items-center space-x-2">
-        <Image src={logo} alt="Artopia Logo" width={40} height={40} />
+        <Image
+          src="/img/logo.png"
+          alt="Artopia Logo"
+          width={40}
+          height={40}
+        />
         <h1 className="text-white text-3xl px-4 font-bold">Artopia</h1>
       </div>
 
@@ -40,7 +44,7 @@ export default function HeadLogo() {
       {/* User Profile */}
       <div className="flex items-center space-x-2 ">
         <Image
-          src={user}
+          src="/img/tin.png"
           alt="User Profile"
           width={32}
           height={32}
