@@ -16,15 +16,15 @@ export default function Community() {
       {
         _id: "1",
         user: "Scarlett",
-        caption: "about cat",
+        caption: "My new drawing ✨",
         imageUrl: "https://placekitten.com/400/300",
         createdAt: "2024-04-25T14:00:00Z",
       },
       {
         _id: "2",
         user: "TINNY",
-        caption: "My new drawing ✨",
-        imageUrl: "https://placekitten.com/500/300",
+        caption: "about cat",
+        imageUrl: "/img/cat.jpg",
         createdAt: "2024-04-26T09:00:00Z",
       },
     ];
