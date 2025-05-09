@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
 import Navbar from "@/components/Navbar";
@@ -64,52 +65,54 @@ export default function Community() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {posts.map((post) => (
-              <div
-                key={post._id}
-                className="relative bg-white border rounded-lg shadow-md p-2 hover:shadow-lg transition"
-              >
-                {/* User Info */}
-                <div className="flex items-center space-x-2">
-                  <Image
-                    src="/img/user.png"
-                    alt="User"
-                    width={30}
-                    height={30}
-                    className="rounded-full"
-                  />
-                  <span className="text-black text-base font-medium">
-                    {post.user}
-                  </span>
-                </div>
+              <Link key={post._id} href={`/community/${post._id}`} passHref>
+                <div className="relative bg-white border rounded-lg shadow-md p-2 hover:shadow-lg transition cursor-pointer">
+                  {/* User Info */}
+                  <div className="flex items-center space-x-2">
+                    <Image
+                      src="/img/user.png"
+                      alt="User"
+                      width={30}
+                      height={30}
+                      className="rounded-full"
+                    />
+                    <span className="text-black text-base font-medium">
+                      {post.user}
+                    </span>
+                  </div>
 
-                {/* Caption */}
-                <p className="text-sm font-medium mt-2 text-black">
-                  {post.caption}
-                </p>
+                  {/* Caption */}
+                  <p className="text-sm font-medium mt-2 text-black">
+                    {post.caption}
+                  </p>
 
-                {/* Like Button */}
-                <div className="absolute top-2 right-2">
-                  <button
-                    onClick={() => toggleLike(post._id)}
-                    className="text-black transition-colors"
-                  >
-                    {likedPosts[post._id] ? (
-                      <HeartIconSolid className="w-5 h-5 text-red-500" />
-                    ) : (
-                      <HeartIconOutline className="w-5 h-5 hover:text-red-500" />
-                    )}
-                  </button>
-                </div>
+                  {/* Like Button */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault(); // ป้องกันไม่ให้ลิงก์ทำงานเวลา like
+                        toggleLike(post._id);
+                      }}
+                      className="text-black transition-colors"
+                    >
+                      {likedPosts[post._id] ? (
+                        <HeartIconSolid className="w-5 h-5 text-black hover:opacity-70" />
+                      ) : (
+                        <HeartIconOutline className="w-5 h-5 hover:text-black hover:opacity-70" />
+                      )}
+                    </button>
+                  </div>
 
-                {/* Image */}
-                <div className="w-full h-36 bg-gray-100 rounded-md mt-2 overflow-hidden">
-                  <img
-                    src={post.imageUrl}
-                    alt="Post"
-                    className="object-cover w-full h-full"
-                  />
+                  {/* Image */}
+                  <div className="w-full h-36 bg-gray-100 rounded-md mt-2 overflow-hidden">
+                    <img
+                      src={post.imageUrl}
+                      alt="Post"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </main>
