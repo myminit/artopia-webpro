@@ -14,12 +14,15 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   logout: () => void;  // เพิ่ม logout ใน context type
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   logout: () => {}, // default noop
+  setUser: () => {}, 
+  
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -56,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
