@@ -17,6 +17,8 @@ import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
 import { ChatBubbleBottomCenterTextIcon as CommentIconOutline } from "@heroicons/react/24/outline";
 // Report (Flag)
 import { FlagIcon as FlagIconOutline } from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
+
 //send
 import { PaperAirplaneIcon as SendOutline } from "@heroicons/react/24/outline";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
@@ -52,10 +54,13 @@ export default function PostDetailPage() {
   const router = useRouter();
 
   const [liked, setLiked] = useState(false);
-  const [hearted, setHearted] = useState(false);
+  //const [hearted, setHearted] = useState(false);
+  const [heartedPost, setHeartedPost] = useState(false);
+  const [commentHearts, setCommentHearts] = useState({});
 
   //const [showReportPopup, setShowReportPopup] = useState(false);
   const [reportReason, setReportReason] = useState("");
+  const [showPopupIndex, setShowPopupIndex] = useState(null);
   const [customReason, setCustomReason] = useState("");
   const [post, setPost] = useState(null);
 
@@ -68,13 +73,25 @@ export default function PostDetailPage() {
   const [commentReportReason, setCommentReportReason] = useState("");
   const [commentCustomReason, setCommentCustomReason] = useState("");
 
+
+
   // นำข้อมูลโพสต์จาก mock data มาใช้
   useEffect(() => {
     if (!postid) return;
 
     const selectedPost = mockPosts.find((p) => p._id === postid);
     setPost(selectedPost || null);
+
+    // สร้างค่า liked สำหรับแต่ละคอมเมนต์
+    if (selectedPost) {
+      const hearts = {};
+      selectedPost.comments.forEach((_, index) => {
+        hearts[index] = false; // ยังไม่ได้กด
+      });
+      setCommentHearts(hearts);
+    }
   }, [postid]);
+  
 
   if (!post) return <div>กำลังโหลด...</div>; // ถ้ายังไม่ได้โหลดข้อมูล
 
@@ -130,10 +147,10 @@ export default function PostDetailPage() {
                 <p className="mt-2 text-gray-800">{post.caption}</p>
                 <div className="mt-4 flex flex-wrap gap-4 text-gray-500 text-sm items-center">
                   <button
-                    onClick={() => setHearted(!hearted)}
+                    onClick={() => setHeartedPost(!heartedPost)}
                     className="flex items-center gap-1 hover:opacity-70"
                   >
-                    {hearted ? (
+                    {heartedPost ? (
                       <HeartIconSolid className="w-6 h-6 text-black" />
                     ) : (
                       <HeartIconOutline className="w-6 h-6 text-black" />
@@ -147,42 +164,78 @@ export default function PostDetailPage() {
                 </div>
               </div>
               {/* Right: Comments */}
-              <div className="w-full lg:w-[480px] bg-sky-300 rounded-2xl p-4">
+              <div className="w-full lg:w-[480px] bg-sky-300 rounded-2xl p-4 flex flex-col h-[600px]">
                 <h3 className="text-xl font-semibold mb-4">Comments</h3>
+                {/* Scrollable Comment List */}
+                <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+                  {post.comments.map((comment, index) => (
+                    <div key={index} className="mb-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-purple-500"></div>
+                          <span className="font-semibold text-sm">
+                            {comment.user}
+                          </span>
+                        </div>
 
-                {post.comments.map((comment, index) => (
-                  <div key={index} className="mb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-6 h-6 rounded-full bg-purple-500"></div>
-                      <span className="font-semibold text-sm">
-                        {comment.user}
-                      </span>
+                        {/* ... vertical icon */}
+                        <div className="relative">
+                          <button
+                            onClick={() =>
+                              setShowPopupIndex((prev) =>
+                                prev === index ? null : index
+                              )
+                            }
+                            className="text-black hover:opacity-80"
+                          >
+                            <EllipsisVerticalIcon className="w-5 h-5" />
+                          </button>
+
+                          {/*  Popup with Flag */}
+                          {showPopupIndex === index && (
+                            <div className="absolute right-0 mt-1 bg-white rounded w-28 z-50">
+                              <button
+                                onClick={() => {
+                                  setShowCommentReportPopup(true);
+                                  setShowPopupIndex(null);
+                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                              >
+                                <FlagIconOutline className="w-4 h-4 mr-2" />
+                                Report
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-sm">{comment.content}</p>
+
+                      <div className="flex gap-4 mt-1 text-xs text-gray-700">
+                        <button
+                          onClick={() =>
+                            setCommentHearts((prev) => ({
+                              ...prev,
+                              [index]: !prev[index],
+                            }))
+                          }
+                          className="flex items-center gap-1 hover:opacity-70"
+                        >
+                          {commentHearts[index] ? (
+                            <HeartIconSolid className="w-5 h-5 text-black" />
+                          ) : (
+                            <HeartIconOutline className="w-5 h-5 text-black" />
+                          )}
+                        </button>
+
+                        <CommentIconOutline className="w-5 h-5 text-black" />
+                      </div>
                     </div>
-                    <p className="text-sm">{comment.content}</p>
-                    <div className="flex gap-4 mt-1 text-xs text-gray-700">
-                      <button
-                        onClick={() => setLiked(!liked)}
-                        className="hover:opacity-70"
-                      >
-                        {liked ? (
-                          <LikeSolid className="w-5 h-5 text-black" />
-                        ) : (
-                          <LikeOutline className="w-5 h-5 text-black" />
-                        )}
-                      </button>
-
-                      <CommentIconOutline className="w-5 h-5 text-black" />
-
-                      <FlagIconOutline
-                        className="w-5 h-5 text-black cursor-pointer"
-                        onClick={() => setShowCommentReportPopup(true)}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
 
                 {/* Input comment */}
-                <div className="mt-6 flex items-center border rounded px-2 bg-white">
+                <div className="mt-4 flex items-center border rounded px-2 bg-white">
                   <input
                     type="text"
                     placeholder="Your comment"

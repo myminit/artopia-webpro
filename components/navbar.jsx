@@ -38,7 +38,6 @@ export default function Navbar() {
           const isActive =
             activePath === item.href || activePath.startsWith(item.href + "/");
 
-            
             return (
               <Link
                 key={item.name}
