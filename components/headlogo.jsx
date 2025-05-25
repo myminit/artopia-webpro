@@ -96,7 +96,7 @@ export default function HeadLogo() {
           )}
 
           <span className="text-black text-xl font-medium">
-            {user ? user.name : "Sign In"}
+            {user ? user.name : "Guest"}
           </span>
         </button>
 
@@ -176,7 +176,7 @@ export default function HeadLogo() {
                     href="/login"
                     className="w-full text-center bg-sky-500 text-white py-2 rounded-full hover:bg-sky-600 transition duration-200 font-medium shadow-sm"
                   >
-                    Log In
+                    Sign In
                   </Link>
 
                   <p className="text-xs text-gray-400 italic max-w-[220px]">

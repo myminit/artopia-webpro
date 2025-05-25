@@ -34,23 +34,26 @@ export default function Navbar() {
       {/* Top Menu */}
       <div className="space-y-4 ">
         {navItems.map((item) => {
-          const isActive = activePath === item.href;
+          //const isActive = activePath === item.href;
+          const isActive =
+            activePath === item.href || activePath.startsWith(item.href + "/");
 
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
-                isActive
-                  ? "bg-white text-sky-500 font-medium"
-                  : "hover:bg-sky-300/40"
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.name}</span>
-            </Link>
-          );
-        })}
+            
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
+                  isActive
+                    ? "bg-white text-sky-500 font-medium"
+                    : "hover:bg-sky-300/40"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
       </div>
 
       {/* Logout */}
