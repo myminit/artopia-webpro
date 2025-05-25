@@ -13,24 +13,54 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // เพิ่ม state สำหรับเก็บข้อความ error ของแต่ละช่อง
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
+
   const handleRegister = async () => {
+    // เคลียร์ error ก่อนส่ง
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+    setGeneralError('');
+
+    let hasError = false;
+
+    if (!name.trim()) {
+      setNameError('Please enter your name');
+      hasError = true;
+    }
+
+    if (!email.trim()) {
+      setEmailError('Please enter your email');
+      hasError = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Please enter a valid email(e.g., user@example.com)');
+      hasError = true;
+    }
+
     if (password.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
+      setPasswordError('Password must be at least 6 characters');
+      hasError = true;
     }
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
+      setConfirmPasswordError('Passwords do not match');
+      hasError = true;
     }
+
+    if (hasError) return; // หากมี error ใดๆ หยุดไม่ส่ง request
 
     try {
       await axios.post('/api/auth/register', { name, email, password });
       localStorage.setItem('Email', email);
-      // สมัครเสร็จ ไป /verify-email
       router.push('/verify-email');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Registration failed');
+      setGeneralError(error.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -47,20 +77,31 @@ export default function RegisterPage() {
           Already have an account? <a href="/login" className="underline">Log in</a>
         </p>
 
-        <input
-          type="text"
-          placeholder="What should we call you?"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border w-full p-2 mb-4 rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border w-full p-2 mb-4 rounded"
-        />
+        {generalError && (
+          <p className="text-red-600 text-center mb-4">{generalError}</p>
+        )}
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="What should we call you?"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={`border w-full p-2 rounded ${nameError ? 'border-red-500' : ''}`}
+          />
+          {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
+        </div>
+
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={`border w-full p-2 rounded ${emailError ? 'border-red-500' : ''}`}
+          />
+          {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
+        </div>
 
         <div className="relative mb-4">
           <input
@@ -68,7 +109,7 @@ export default function RegisterPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border w-full p-2 rounded"
+            className={`border w-full p-2 rounded ${passwordError ? 'border-red-500' : ''}`}
           />
           <button
             type="button"
@@ -77,15 +118,19 @@ export default function RegisterPage() {
           >
             {showPassword ? 'Hide' : 'Show'}
           </button>
+          {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
         </div>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="border w-full p-2 mb-6 rounded"
-        />
+        <div className="mb-6">
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className={`border w-full p-2 rounded ${confirmPasswordError ? 'border-red-500' : ''}`}
+          />
+          {confirmPasswordError && <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>}
+        </div>
 
         <button
           onClick={handleRegister}

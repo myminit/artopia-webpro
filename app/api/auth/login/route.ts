@@ -3,7 +3,6 @@ import connectDB from '@/config/db';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { signToken } from '@/utills/auth'
-
 export async function POST(req: NextRequest) {
   await connectDB();
   const { email, password } = await req.json();
@@ -11,19 +10,21 @@ export async function POST(req: NextRequest) {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      // บอกชัดว่า email ผิด
+      return NextResponse.json({ message: 'Email not found' }, { status: 401 });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      // บอกชัดว่ารหัสผิด
+      return NextResponse.json({ message: 'Incorrect password' }, { status: 401 });
     }
 
-    // สร้าง JWT พร้อม role และ id
     const token = signToken({ id: user._id.toString(), role: user.role });
 
     const response = NextResponse.json({
       message: 'Login successful!',
+      token,
       user: {
         id: user._id,
         name: user.name,

@@ -15,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   logout: () => void;  // เพิ่ม logout ใน context type
   setUser: (user: User | null) => void;
+  login: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   logout: () => {}, // default noop
   setUser: () => {}, 
+  login: async () => {},
   
 });
 
@@ -31,25 +33,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await axios.get('/api/auth/me');
+        const res = await axios.get('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setUser(res.data);
       } catch {
-        setUser(null); // ยังไม่ login
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchUser();
   }, []);
+  
 
+  const login = async (token: string) => {
+    setLoading(true);
+    localStorage.setItem('token', token); // ถ้าคุณใช้ localStorage
+    try {
+      const res = await axios.get('/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`, // ส่ง token ไปเช็ค user
+        },
+      });
+      setUser(res.data);
+    } catch (error) {
+      console.error('Login failed:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
   // ฟังก์ชัน logout
   const logout = async () => {
     setLoading(true);
     try {
-      await axios.post('/api/auth/logout');  // เรียก API ลบ cookie ที่ server
-      setUser(null);                        // เคลียร์ user state กลับเป็น null
+      await axios.post('/api/auth/logout');
+      localStorage.removeItem('token');
+      setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
@@ -57,9 +90,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
+  
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
