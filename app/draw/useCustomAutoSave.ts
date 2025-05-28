@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { CustomCanvasRef } from './CustomCanvas';
 
-export const useCustomAutoSave = (canvasRef: React.RefObject<CustomCanvasRef>) => {
+export const useCustomAutoSave = (canvasRef: React.RefObject<CustomCanvasRef | null>) => {
   useEffect(() => {
     const interval = setInterval(() => {
       try {
