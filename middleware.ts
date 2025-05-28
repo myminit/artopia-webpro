@@ -24,12 +24,12 @@ export function middleware(req: NextRequest) {
 
     // ❌ User ห้ามเข้า admin page
     if (pathname.startsWith('/admin') && !isAdmin(decoded)) {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
 
     // ❌ Admin ห้ามเข้า user page
     if (pathname.startsWith('/user') && !isUser(decoded)) {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
 
     return NextResponse.next(); // ✅ ผ่านได้
