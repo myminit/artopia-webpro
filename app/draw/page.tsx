@@ -15,7 +15,7 @@ import { useCustomAutoSave } from './useCustomAutoSave';
 
 export default function DrawPage() {
   const router = useRouter();
-  const canvasRef = useRef<CustomCanvasRef>(null);
+  const canvasRef = useRef<CustomCanvasRef | null>(null);
 
   const [tool, setTool]           = useState(TOOL_TYPE.BRUSH);
   const [brushSize, setBrushSize] = useState(DEFAULT_BRUSH_SIZE);
