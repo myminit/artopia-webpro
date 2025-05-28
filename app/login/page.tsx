@@ -4,43 +4,86 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
-    try {
-      const loginResponse = await axios.post('/api/auth/login', { email, password });
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
+  const handleLogin = async () => {
+    // เคลียร์ error ก่อนส่ง
+    setEmailError('');
+    setPasswordError('');
+    setGeneralError('');
+
+    /*try {
+      const loginResponse = await axios.post('/api/auth/login', { email, password });
+      
       if (loginResponse.data.token) {
-        // หากได้รับ JWT token จากการ login สำเร็จ
         localStorage.setItem('token', loginResponse.data.token);
-        
-        // ใช้ token ที่ได้รับ ไปดึงข้อมูลผู้ใช้จาก API /me
+
         const me = await axios.get('/api/auth/me', {
           headers: {
-            Authorization: `Bearer ${loginResponse.data.token}`, // ส่ง token ใน header
-          }
+            Authorization: `Bearer ${loginResponse.data.token}`,
+          },
         });
 
-        // ตรวจสอบ role ของผู้ใช้
-        if (me.data.role === 'admin') {
-          // สมัครเสร็จ ไป /admin/dashboard
-          router.push('/');
-        } else if (me.data.role === 'user') {
-          // สมัครเสร็จ ไป /user/dashboard
+        if (me.data.role === 'admin' || me.data.role === 'user') {
           router.push('/');
         } else {
-          alert('Unknown role');
+          setGeneralError('Unknown role');
         }
       } else {
-          alert('Login failed: No token received');
+        setGeneralError('Login failed: No token received');
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Login failed');
+      const message = error.response?.data?.message || 'Login failed';
+      if (message.toLowerCase().includes('email')) {
+        setEmailError(message);
+      } else if (message.toLowerCase().includes('password')) {
+        setPasswordError(message);
+      } else {
+        setGeneralError(message);
+      }
+    }
+  };*/
+  //ประกาศ login(token) ใน AuthContext ไว้แล้วควรใช้ login(token) นั้นเพื่อให้ Context อัปเดต user ให้ทันที
+  try {
+    const loginResponse = await axios.post('/api/auth/login', { email, password });
+
+    const token = loginResponse.data.token;
+
+    if (token) {
+      localStorage.setItem('token', token);
+
+      // เรียก login จาก useAuth เพื่อโหลด user เข้าสู่ context
+      await login(token);
+
+      // เช็ก role หลัง login() เพื่อ redirect
+      if (loginResponse.data.user?.role === 'admin' || loginResponse.data.user?.role === 'user') {
+        router.push('/');
+      } else {
+        setGeneralError('Unknown role');
+      }
+    } else {
+      setGeneralError('Login failed: No token received');
+    }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Login failed';
+      if (message.toLowerCase().includes('email')) {
+        setEmailError(message);
+      } else if (message.toLowerCase().includes('password')) {
+        setPasswordError(message);
+      } else {
+        setGeneralError(message);
+      }
     }
   };
 
@@ -54,13 +97,21 @@ export default function LoginPage() {
       <div className="bg-white p-8 rounded-lg mt-6 w-96">
         <h2 className="text-center text-2xl font-semibold mb-6">Sign in</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border w-full p-2 mb-4 rounded"
-        />
+        {generalError && (
+          <p className="text-red-500 text-sm text-center mb-4">{generalError}</p>
+        )}
+
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="border w-full p-2 rounded"
+          />
+          {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
+        </div>
+
         <div className="relative mb-6">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -76,6 +127,7 @@ export default function LoginPage() {
           >
             {showPassword ? 'Hide' : 'Show'}
           </button>
+          {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
         </div>
 
         <button
