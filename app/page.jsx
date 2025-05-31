@@ -7,8 +7,8 @@ import {
   TrashIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
-import Navbar from "@/components/Navbar";
-import HeadLogo from "@/components/HeadLogo";
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 
 export default function Gallery() {
   const [drawings, setDrawings] = useState([]);

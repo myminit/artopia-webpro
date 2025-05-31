@@ -4,8 +4,8 @@ import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation"; 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import HeadLogo from "@/components/HeadLogo";
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 // Like
 import { HandThumbUpIcon as LikeSolid } from "@heroicons/react/24/solid";
 import { HandThumbUpIcon as LikeOutline } from "@heroicons/react/24/outline";
@@ -72,8 +72,6 @@ export default function PostDetailPage() {
 
   const [commentReportReason, setCommentReportReason] = useState("");
   const [commentCustomReason, setCommentCustomReason] = useState("");
-
-
 
   // นำข้อมูลโพสต์จาก mock data มาใช้
   useEffect(() => {
