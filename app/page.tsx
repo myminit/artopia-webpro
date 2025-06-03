@@ -12,6 +12,9 @@ import {
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/solid';
 
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
+
 interface DrawingItem {
   _id: string;
   name: string;         // ตรงกับ field “name” ใน MongoDB
@@ -125,52 +128,28 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ─── Navbar ───────────────────────────────────────────────────── */}
-      <header className="fixed top-0 left-0 w-full h-[60px] bg-[#00AEEF] shadow z-50 flex items-center px-6">
-        <h1 className="text-white text-xl font-bold">Artopia</h1>
-        <div className="flex-1 mx-6">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full px-4 py-2 rounded-lg focus:outline-none"
-          />
+          {/* HeadLogo */}
+          <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
+            <HeadLogo />
+          </div>
+
+          <div className="flex pt-[70px]">
+        {/* Navbar */}
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+          <Navbar />
         </div>
-        <div className="text-white font-medium">tin</div>
-      </header>
 
-      <div className="flex pt-[60px]">
-        {/* ─── Sidebar ─────────────────────────────────────────────────────── */}
-        <aside className="fixed top-[60px] left-0 h-[calc(100vh-60px)] w-60 bg-[#00AEEF] text-white shadow-lg z-40">
-          <nav className="mt-8 flex flex-col space-y-4 px-4">
-            <Link href="/" className="hover:bg-blue-500 rounded-md px-3 py-2">
-              Home
-            </Link>
-            <Link href="/draw" className="hover:bg-blue-500 rounded-md px-3 py-2">
-              Draw
-            </Link>
-            <Link href="/community" className="hover:bg-blue-500 rounded-md px-3 py-2">
-              Community
-            </Link>
-            <Link href="/upload" className="hover:bg-blue-500 rounded-md px-3 py-2">
-              Upload
-            </Link>
-            <Link href="/account-setting" className="hover:bg-blue-500 rounded-md px-3 py-2">
-              Account Setting
-            </Link>
-          </nav>
-        </aside>
-
-        {/* ─── Main Content ───────────────────────────────────────────────── */}
-        <main className="ml-60 flex-1 overflow-y-auto p-6">
-          {/* ─── Banner ──────────────────────────────────────────────── */}
-          <div className="mb-8">
+        {/* Main */}
+        <main className="ml-72 flex-1 overflow-y-auto p-6">
+          {/* Banner */}
+          <div className="w-full mb-8">
             <Image
               src="/img/banner.png"
               alt="Artopia Banner"
               width={1200}
               height={200}
-              className="w-full h-auto object-cover rounded-lg"
               priority
+              className="w-full h-auto object-cover rounded-lg"
             />
           </div>
 
@@ -185,12 +164,6 @@ export default function GalleryPage() {
               <p className="mb-4 text-gray-700">
                 กรุณาเข้าสู่ระบบเพื่อดู Gallery ของคุณ
               </p>
-              <button
-                onClick={() => router.push('/login')}
-                className="px-6 py-2 bg-blue-500 text-white rounded"
-              >
-                Sign In
-              </button>
             </div>
           )}
           {isLoggedIn === true && items.length === 0 && (
