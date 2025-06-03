@@ -1,45 +1,88 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminHeadLogo from "@/components/admin/adminheadlogo";
 import AdminNavbar from "@/components/admin/adminnavbar";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; 
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation"; 
 import {
   PencilIcon,
   TrashIcon,
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 
-
 export default function Adminuserid() {
     const params = useParams();
     const userId = params.userid;
     const router = useRouter();
+    const [user, setUser] = useState(null);
+    const [banUntil, setBanUntil] = useState("");
+    const [loading, setLoading] = useState(true);
 
-  const [user] = useState({
-    id: userId,
-    email: "TINNY@mail",
-    lastUpdate: "24 Jun 2025",
-    status: "Baned",
-    banUntil: "30 Jun 2025",
-    profilePicture: "/profile.jpg",
-  });
+  const [reports, setReports] = useState([]);
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch(`/api/admin/user/${userId}`, {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("โหลดข้อมูลผู้ใช้ล้มเหลว");
 
-  const [reports] = useState([
-    { id: 1, byUserId: 1, reportUserId: 1, lastUpdate: "24 Jun 2023" },
-    { id: 2, byUserId: 1, reportUserId: 1, lastUpdate: "24 Jun 2023" },
-    { id: 3, byUserId: 1, reportUserId: 1, lastUpdate: "24 Jun 2023" },
-  ]);
+        const data = await res.json();
+        setUser(data);
+        setBanUntil(data.banUntil ? data.banUntil.slice(0, 10) : ""); // format YYYY-MM-DD
+      } catch (err) {
+        console.error(err);
+        alert("ไม่สามารถโหลดข้อมูลได้");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const handleEdit = (user) => {
-    console.log("Edit", user);
+    fetchUser();
+  }, [userId]);
+
+  const handleBanUpdate = async () => {
+    try {
+      const res = await fetch(`/api/admin/user/${userid}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isBanned: true,
+          banUntil: banUntil ? new Date(banUntil).toISOString() : null,
+        }),
+      });
+
+      if (!res.ok) throw new Error("อัปเดตข้อมูลล้มเหลว");
+
+      const updated = await res.json();
+      setUser(updated);
+      alert("บันทึกการแบนแล้ว");
+    } catch (err) {
+      console.error(err);
+      alert("บันทึกไม่สำเร็จ");
+    }
   };
 
-  const handleDelete = (id) => {
-    console.log("Delete", id);
-  };
+  const handleDelete = async () => {
+    if (!confirm("ลบผู้ใช้นี้จริงหรือไม่?")) return;
 
+    try {
+      const res = await fetch(`/api/admin/user/${userid}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("ลบไม่สำเร็จ");
+
+      alert("ลบผู้ใช้เรียบร้อยแล้ว");
+      router.push("/admin/user");
+    } catch (err) {
+      console.error(err);
+      alert("ลบผู้ใช้ไม่สำเร็จ");
+    }
+  };
+  if (!user) return <p>ไม่พบผู้ใช้</p>;
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -71,13 +114,13 @@ export default function Adminuserid() {
                   <span className="inline-block min-w-[120px] text-gray-400">
                     User ID:
                   </span>
-                  {user.id}
+                  {user._id}
                 </p>
                 <p>
                   <span className="inline-block min-w-[120px] text-gray-400">
                     Username:
                   </span>
-                  {user.username}
+                  {user.name}
                 </p>
                 <p>
                   <span className="inline-block min-w-[120px] text-gray-400">
@@ -89,7 +132,7 @@ export default function Adminuserid() {
                   <span className="inline-block min-w-[120px] text-gray-400">
                     Last Update:
                   </span>
-                  {user.lastUpdate}
+                  {user.updatedAt}
                 </p>
                 <p>
                   <span className="inline-block min-w-[120px] text-gray-400">
@@ -103,16 +146,6 @@ export default function Adminuserid() {
                   </span>
                   {user.banUntil}
                 </p>
-              </div>
-              <div className="text-center pl-8 pr-12">
-                <p className="mb-2 font-semibold">Profile Picture</p>
-                <Image
-                  src={user.profilePicture}
-                  alt="Profile"
-                  width={80}
-                  height={80}
-                  className="rounded-full object-cover"
-                />
               </div>
             </div>
           </div>

@@ -52,6 +52,7 @@ export default function PostDetailPage() {
   const params = useParams();
   const postid = params.postid;
   const router = useRouter();
+  
 
   const [liked, setLiked] = useState(false);
   //const [hearted, setHearted] = useState(false);

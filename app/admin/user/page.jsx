@@ -14,34 +14,56 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function Adminuser() {
-    const router = useRouter();
-  // ✅ mock user data ใช้เฉพาะตอนยังไม่มี backend
-  const [users, setUsers] = useState([
-    {
-      _id: "1",
-      username: "mockuser1",
-      email: "mock1@example.com",
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      _id: "2",
-      username: "mockuser2",
-      email: "mock2@example.com",
-      updatedAt: new Date().toISOString(),
-    },
-  ]);
+  const router = useRouter();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(false); // ไม่มีการโหลดจริง
+  useEffect(() => {
+    async function fetchUsers() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/admin/user", {
+          credentials: "include", // ส่ง cookie (token) ไปด้วย
+        });
+        if (!res.ok) throw new Error("โหลดข้อมูลผู้ใช้ล้มเหลว");
 
-  const handleDelete = (id) => {
+        const data = await res.json();
+        setUsers(data);
+      } catch (error) {
+        console.error(error);
+        alert("โหลดข้อมูลผู้ใช้ล้มเหลว");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
+  // ลบผู้ใช้จริง โดยเรียก API DELETE
+  const handleDelete = async (id) => {
     if (!confirm("ต้องการลบผู้ใช้นี้จริงหรือไม่?")) return;
-    setUsers(users.filter((u) => u._id !== id));
+
+    try {
+      const res = await fetch(`/api/admin/user/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("ลบผู้ใช้ล้มเหลว");
+
+      // ลบ user ออกจาก state เพื่อรีเฟรช UI
+      setUsers(users.filter((u) => u._id !== id));
+    } catch (error) {
+      console.error(error);
+      alert("ลบผู้ใช้ล้มเหลว");
+    }
   };
 
   const handleEdit = (user) => {
     router.push(`/admin/user/${user._id}`);
   };
-
+  
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -71,7 +93,6 @@ export default function Adminuser() {
                 />
               </div>
             </div>
-            
           </div>
 
           {/* User Table */}
@@ -97,7 +118,7 @@ export default function Adminuser() {
                   users.map((user, index) => (
                     <tr key={user._id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{user._id}</td>
-                      <td className="px-4 py-2">{user.username}</td>
+                      <td className="px-4 py-2">{user.name}</td>
                       <td className="px-4 py-2">{user.email}</td>
                       <td className="px-4 py-2">
                         {new Date(user.updatedAt).toLocaleDateString()}

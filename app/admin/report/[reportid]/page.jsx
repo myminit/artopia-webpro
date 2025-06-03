@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; 
 import { useParams } from "next/navigation";
 import AdminHeadLogo from "@/components/admin/adminheadlogo";
@@ -13,8 +13,9 @@ export default function AdminReportid() {
   const params = useParams();
   const reportId = params.reportid;
   const router = useRouter();
-
-  const [report] = useState({
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  /*const [report] = useState({
     id: reportId,
     byUserId: 1,
     reportUserId: 1,
@@ -25,7 +26,53 @@ export default function AdminReportid() {
 
   const handleDelete = () => {
     console.log("Deleting report:", report.id);
+  };*/
+  useEffect(() => {
+    async function fetchReport() {
+      try {
+        const res = await fetch(`/api/admin/report/${reportId}`, {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Failed to fetch report:", res.status, errText);
+          alert("ไม่พบรายงานหรือเกิดข้อผิดพลาด");
+          router.push("/admin/report");
+          return;
+        }
+        const data = await res.json();
+        setReport(data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert("เกิดข้อผิดพลาดขณะโหลดรายงาน");
+        router.push("/admin/report");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchReport();
+  }, [reportId, router]);
+
+  const handleDelete = async () => {
+    if (!confirm("ต้องการลบรายงานนี้จริงหรือไม่?")) return;
+    try {
+      const res = await fetch(`/api/admin/report/${reportId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || "ลบรายงานไม่สำเร็จ");
+      }
+      alert("ลบรายงานสำเร็จ");
+      router.push("/admin/report");
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("ลบรายงานไม่สำเร็จ");
+    }
   };
+
+  if (!report) return <p>ไม่พบรายงาน</p>;
 
   return (
     <div className="min-h-screen bg-gray-100">

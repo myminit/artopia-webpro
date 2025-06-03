@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import AdminNavbar from "@/components/admin/adminnavbar";
@@ -13,39 +13,57 @@ import {
 
 export default function AdminReports() {
   const router = useRouter();
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ mock report data
-  const [reports, setReports] = useState([
-    {
-      _id: "1",
-      byUserId: "1",
-      reportUserId: "1",
-      updatedAt: "2023-06-24T00:00:00Z",
-    },
-    {
-      _id: "2",
-      byUserId: "1",
-      reportUserId: "1",
-      updatedAt: "2023-06-24T00:00:00Z",
-    },
-    {
-      _id: "3",
-      byUserId: "1",
-      reportUserId: "1",
-      updatedAt: "2023-06-24T00:00:00Z",
-    },
-    // เพิ่ม mock ตามต้องการ
-  ]);
+  useEffect(() => {
+    async function fetchReports() {
+      try {
+        const res = await fetch("/api/admin/report", {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Failed to fetch reports:", res.status, errText);
+          alert("ไม่สามารถโหลดรายงานได้");
+          return;
+        }
+        const data = await res.json();
+        setReports(data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert("เกิดข้อผิดพลาดขณะโหลดรายงาน");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchReports();
+  }, []);
 
   const handleDelete = (id) => {
     if (!confirm("ต้องการลบรายงานนี้จริงหรือไม่?")) return;
-    setReports(reports.filter((r) => r._id !== id));
+
+    // เรียก API ลบรายงาน (ต้องเขียน DELETE API ด้วย)
+    fetch(`/api/admin/report/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("ลบรายงานไม่สำเร็จ");
+        setReports(reports.filter((r) => r._id !== id));
+        alert("ลบรายงานสำเร็จ");
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("ลบรายงานไม่สำเร็จ");
+      });
   };
 
   const handleEdit = (report) => {
     router.push(`/admin/report/${report._id}`);
   };
 
+  
   return (
     <div className="min-h-screen">
       {/* Header */}
