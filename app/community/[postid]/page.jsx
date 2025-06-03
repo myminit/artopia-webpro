@@ -4,8 +4,8 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import HeadLogo from '@/components/HeadLogo';
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 import {
   HeartIcon as HeartIconSolid,
   HeartIcon as HeartIconOutline,

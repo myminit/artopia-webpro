@@ -6,8 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline';
-import Navbar from '@/components/Navbar';
-import HeadLogo from '@/components/HeadLogo';
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 
 export default function CommunityFeed() {
   const [posts, setPosts] = useState([]);
