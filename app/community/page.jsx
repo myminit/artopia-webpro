@@ -4,8 +4,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import HeadLogo from '@/components/HeadLogo';
-import Navbar from '@/components/Navbar';
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 import {
   HeartIcon as HeartIconSolid,
   HeartIcon as HeartIconOutline,

@@ -10,7 +10,7 @@ export async function PUT(req, { params }) {
   if (!isAdmin(payload)) return new Response("Unauthorized", { status: 403 });
 
   const { id } = params;
-  const data = await req.json(); // { status: "banned", banUntil: "2025-06-30" }
+  const data = await req.json();
 
   const updated = await User.findByIdAndUpdate(id, data, { new: true });
   return Response.json(updated);

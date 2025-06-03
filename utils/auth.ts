@@ -48,7 +48,7 @@ export function getTokenFromReq(req: NextRequest): string | null {
 
 // ── 4. ฟังก์ชันดึง user จาก request ────────────────────────────────────────
 export async function getUserFromReq(req: NextRequest): Promise<TokenPayload | null> {
-  // สมมติว่า JWT เราเก็บไว้ใน cookie ชื่อ “token”
+  // สมมติว่า JWT เราเก็บไว้ใน cookie ชื่อ "token"
   const token = req.cookies.get('token')?.value;
   if (!token) return null;
   try {
@@ -75,4 +75,24 @@ export function isAdmin(user: IUser | TokenPayload) {
 }
 export function isUser(user: IUser | TokenPayload) {
   return user.role === 'user';
+}
+
+export interface Session {
+  user: TokenPayload;
+}
+
+export async function getSession(req: NextRequest): Promise<Session | null> {
+  try {
+    const token = getTokenFromReq(req);
+    if (!token) {
+      return null;
+    }
+
+    const decoded = verifyToken(token);
+    return {
+      user: decoded
+    };
+  } catch (error) {
+    return null;
+  }
 }
