@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, isAdmin, isUser } from '@/utills/auth';
+import { verifyToken, isAdmin, isUser } from '@/utils/auth';
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get('token')?.value;

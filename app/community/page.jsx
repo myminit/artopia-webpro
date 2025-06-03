@@ -1,50 +1,45 @@
-"use client";
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
-import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
-import Navbar from "@/components/Navbar";
-import HeadLogo from "@/components/HeadLogo";
+// app/community/page.jsx
+'use client';
 
-export default function Community() {
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline';
+import Navbar from '@/components/Navbar';
+import HeadLogo from '@/components/HeadLogo';
+
+export default function CommunityFeed() {
   const [posts, setPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState({});
 
   useEffect(() => {
-    // 🔧 Mock data จำลองโพสต์
-    const mockPosts = [
-      {
-        _id: "1",
-        user: "Scarlett",
-        caption: "My new drawing ✨",
-        imageUrl: "https://placekitten.com/400/300",
-        createdAt: "2024-04-25T14:00:00Z",
-      },
-      {
-        _id: "2",
-        user: "TINNY",
-        caption: "about cat",
-        imageUrl: "/img/cat.jpg",
-        createdAt: "2024-04-26T09:00:00Z",
-      },
-    ];
-
-    // 🔃 เรียงโพสต์จากใหม่ -> เก่า
-    const sorted = mockPosts.sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-
-    setPosts(sorted);
+    fetch('/api/community/list')
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts(data);
+        // เตรียม state ไว้ว่ากดไลค์หรือยัง
+        const initLikes = {};
+        data.forEach((p) => {
+          initLikes[p._id] = false;
+        });
+        setLikedPosts(initLikes);
+      })
+      .catch(console.error);
   }, []);
 
-  const toggleLike = (postId) => {
+  const toggleLike = async (postId) => {
+    // กันลิงก์เกิดขึ้น
+    // เรียก API toggle like
+    await fetch(`/api/community/${postId}/like`, {
+      method: 'POST',
+      credentials: 'include',
+    });
     setLikedPosts((prev) => ({
       ...prev,
       [postId]: !prev[postId],
     }));
   };
-
 
   return (
     <div className="min-h-screen">
@@ -77,7 +72,7 @@ export default function Community() {
                       className="rounded-full"
                     />
                     <span className="text-black text-base font-medium">
-                      {post.user}
+                      {post.userName}
                     </span>
                   </div>
 
@@ -90,7 +85,7 @@ export default function Community() {
                   <div className="absolute top-2 right-2 z-10">
                     <button
                       onClick={(e) => {
-                        e.preventDefault(); // ป้องกันไม่ให้ลิงก์ทำงานเวลา like
+                        e.preventDefault();
                         toggleLike(post._id);
                       }}
                       className="text-black transition-colors"

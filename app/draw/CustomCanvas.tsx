@@ -1,3 +1,4 @@
+// File: app/draw/CustomCanvas.tsx
 'use client';
 
 import React, {
@@ -30,7 +31,7 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
   activeColor: 'primary' | 'secondary';
 }>(({ tool, brushSize, primaryColor, secondaryColor, activeColor }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const snapRef   = useRef<ImageData|null>(null);
+  const snapRef   = useRef<ImageData | null>(null);
 
   const [paths, setPaths]         = useState<ImageData[]>([]);
   const [redoStack, setRedoStack] = useState<ImageData[]>([]);
@@ -42,7 +43,7 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
 
   useImperativeHandle(ref, () => ({ undo, redo, exportImage, clear, loadImage }));
 
-  // Initialize blank canvas + history
+  // ─── Initial blank canvas + history ─────────────────────────────────────────
   useEffect(() => {
     const c = canvasRef.current!;
     c.width  = CANVAS_WIDTH;
@@ -53,7 +54,7 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
     saveHistory(ctx);
   }, []);
 
-  // Mouse-wheel → zoom
+  // ─── Mouse-wheel → zoom ───────────────────────────────────────────────────────
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
@@ -65,7 +66,7 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
     return () => c.removeEventListener('wheel', onWheel);
   }, []);
 
-  // Map screen mouse → canvas coords
+  // ─── Map screen mouse → canvas coords ────────────────────────────────────────
   const getPos = (e: React.MouseEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect();
     return {
@@ -81,7 +82,7 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
       ? primaryColor
       : secondaryColor;
 
-  // Make round cursor of given diameter
+  // ─── เปลี่ยน cursor ให้แสดงขนาด brush หรือโหมดพิเศษ ─────────────────────────
   const makeCursor = (size: number) => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
                 `<circle cx="${size/2}" cy="${size/2}" r="${size/2-1}" ` +
@@ -95,19 +96,19 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
       ? 'grab'
       : 'crosshair';
 
-  // --- Mouse event handlers ---
+  // ─── Mouse event handlers ────────────────────────────────────────────────────
 
   const startDraw = (e: React.MouseEvent) => {
     const ctx = canvasRef.current!.getContext('2d')!;
 
-    // Pan mode
+    // **Pan mode (MOVE)**
     if (tool === TOOL_TYPE.MOVE) {
       setPanning(true);
       setStartPos({ x: e.clientX, y: e.clientY });
       return;
     }
 
-    // Fill mode
+    // **Fill mode (FILL)**
     if (tool === TOOL_TYPE.FILL) {
       const { x, y } = getPos(e);
       floodFill(x, y, ctx);
@@ -115,13 +116,12 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
       return;
     }
 
-    // Shape preview snapshot
-    if ([TOOL_TYPE.LINE, TOOL_TYPE.RECT, TOOL_TYPE.CIRCLE, TOOL_TYPE.TRIANGLE]
-        .includes(tool)) {
+    // **Shape preview snapshot** (LINE, RECT, CIRCLE, TRIANGLE)
+    if ([TOOL_TYPE.LINE, TOOL_TYPE.RECT, TOOL_TYPE.CIRCLE, TOOL_TYPE.TRIANGLE].includes(tool)) {
       snapRef.current = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 
-    // Brush/Eraser start
+    // **Brush / Eraser start**
     const { x, y } = getPos(e);
     setStartPos({ x, y });
     setDrawing(true);
@@ -134,7 +134,7 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
   const draw = (e: React.MouseEvent) => {
     const ctx = canvasRef.current!.getContext('2d')!;
 
-    // Pan interaction
+    // **Pan interaction**
     if (tool === TOOL_TYPE.MOVE && panning && startPos) {
       const dx = e.clientX - startPos.x;
       const dy = e.clientY - startPos.y;
@@ -146,20 +146,19 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
     if (!drawing || !startPos) return;
     const { x, y } = getPos(e);
 
-    // Common stroke style
+    // **ปลายปากกา / ยางลบ** (BRUSH/ERASER)
     ctx.strokeStyle = getColor();
     ctx.lineWidth   = brushSize;
     ctx.lineCap     = 'round';
     ctx.lineJoin    = 'round';
 
-    // Brush/Eraser
     if (tool === TOOL_TYPE.BRUSH || tool === TOOL_TYPE.ERASER) {
       ctx.lineTo(x, y);
       ctx.stroke();
       return;
     }
 
-    // Shape preview
+    // **Shape preview iteration (LINE, RECT, CIRCLE, TRIANGLE)**
     if (snapRef.current) {
       ctx.putImageData(snapRef.current, 0, 0);
       const { x: sx, y: sy } = startPos;
@@ -204,23 +203,31 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
     saveHistory(ctx);
   };
 
-  // --- History (undo/redo) ---
+  // ─── History (undo / redo) ─────────────────────────────────────────────────
 
   const saveHistory = (ctx: CanvasRenderingContext2D) => {
-    const snap = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    setPaths(p => {
-      if (p.length === 0) return [snap];
-      const blank = p[0], rest = p.slice(1);
-      const clipped = rest.slice(-(MAX_HISTORY - 1));
-      return [blank, ...clipped, snap];
-    });
-    setRedoStack([]);
+    try {
+      const snap = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      setPaths(p => {
+        // ถ้า p ยังว่างเลย ให้ใส่ snapshot เดิมเป็นพื้น (blank white)
+        if (p.length === 0) return [snap];
+        // พอมีแล้ว ให้เก็บ snapshot ใหม่ (ตัดประวัติเก่าเกิน MAX_HISTORY)
+        const blank = p[0];
+        const rest = p.slice(1);
+        const clipped = rest.slice(-(MAX_HISTORY - 1));
+        return [blank, ...clipped, snap];
+      });
+      setRedoStack([]);
+    } catch (err) {
+      console.warn('saveHistory failed (canvas tainted หรือยังสร้าง Canvas ไม่เสร็จ):', err);
+    }
   };
 
   const undo = () => {
     const ctx = canvasRef.current!.getContext('2d')!;
     if (paths.length < 2) return;
-    const prev = [...paths], last = prev.pop()!;
+    const prev = [...paths];
+    const last = prev.pop()!;
     setPaths(prev);
     setRedoStack(r => [last, ...r]);
     ctx.putImageData(prev[prev.length - 1], 0, 0);
@@ -235,44 +242,65 @@ const CustomCanvas = forwardRef<CustomCanvasRef, {
     ctx.putImageData(first, 0, 0);
   };
 
-  // --- Export/Clear/Load ---
+  // ─── Export / Clear / Load ─────────────────────────────────────────────────
 
-  const exportImage = () => canvasRef.current!.toDataURL('image/png');
+  /** exportImage() → แปลง canvas เป็น dataURL (PNG) */
+  const exportImage = (): string => {
+    const c = canvasRef.current;
+    if (!c) return '';
+    try {
+      return c.toDataURL('image/png');
+    } catch (err) {
+      console.warn('exportImage failed (canvas tainted):', err);
+      return '';
+    }
+  };
 
+  /** clear() → ลบภาพทั้งหมด, reset Pan/Zoom, reset history */
   const clear = () => {
-    const ctx = canvasRef.current!.getContext('2d')!;
-
-    // 1. รีเซ็ต transform (ถ้ามี)
+    const c = canvasRef.current!;
+    const ctx = c.getContext('2d')!;
+    // 1) reset transform
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    // 2. วาดพื้นหลังขาวทั้งแผ่น
+    // 2) ลงพื้นหลังสีขาว
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // 3. รีเซ็ต Pan/Zoom
+    // 3) reset Pan/Zoom
     setOffset({ x: 0, y: 0 });
     setZoom(1);
-
-    // 4. เคลียร์ history เก่า แล้วบันทึก snapshot หน้าเปล่าใหม่
+    // 4) ล้าง history เดิมแล้ว add snapshot หน้าเปล่า
     setPaths([]);
     setRedoStack([]);
     saveHistory(ctx);
   };
 
+  /** loadImage(url) → โหลดรูปจาก S3 (ต้องตั้ง crossOrigin ก่อน) */
   const loadImage = (url: string) => {
     const img = new Image();
+    img.crossOrigin = 'anonymous'; // 🔑 ตั้งก่อนกำหนด src เพื่อให้ CORS ทำงาน
+    img.src = url;
+
     img.onload = () => {
       const ctx = canvasRef.current!.getContext('2d')!;
+      // 1) เคลียร์บริเวณเดิม + reset transform
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      // 2) วาดรูปให้เต็ม canvas
       ctx.drawImage(img, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      // 3) จัดการ Pan/Zoom/History ใหม่
+      setOffset({ x: 0, y: 0 });
+      setZoom(1);
       setPaths([]);
       setRedoStack([]);
       saveHistory(ctx);
     };
-    img.src = url;
+
+    img.onerror = (e) => {
+      console.error('CustomCanvas.loadImage: ไม่สามารถโหลดภาพจาก URL นี้ได้:', url, e);
+    };
   };
 
-  // --- Flood-fill with visited check ---
+  // ─── Flood-fill (Fill tool) ────────────────────────────────────────────────
   function floodFill(x0: number, y0: number, ctx: CanvasRenderingContext2D) {
     const img = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     const data = img.data;
