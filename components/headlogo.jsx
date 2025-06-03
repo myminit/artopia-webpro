@@ -1,34 +1,47 @@
 "use client";
 
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";  // ใช้ custom hook แทนตรงนี้
-import { useRouter } from "next/navigation"; // import useRouter
-
+import { useRouter } from "next/navigation";
 
 import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 export default function HeadLogo() {
-  const { user, logout } = useAuth(); // เรียกใช้ hook ที่คุณสร้างเอง
+  const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
 
-  const handleLogout = () => {
-    logout(); // ฟังก์ชัน logout ใน context ของคุณ ที่ลบ token และ set user = null
+  useEffect(() => {
+    fetch("/api/auth/me", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (res.status === 401) {
+          // guest mode: ไม่ต้อง log error, ไม่ต้อง setUser(null) ซ้ำ
+          return null;
+        }
+        if (!res.ok) {
+          // error อื่นๆ (เช่น 500) ให้ log error
+          console.error("Failed to fetch user:", res.status);
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => setUser(data))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    setUser(null);
     setShowDropdown(false);
-    router.push("/"); // redirect หลัง logout
+    router.push("/");
   };
-  /*const user = {
-    name: "TINNY",
-    email: "tinny@example.com",
-    avatar: "/img/tin.png",
-  };*/
-  //const { user, loading } = useAuth();
 
   return (
     <header className="relative flex items-center justify-between px-8 py-4 bg-sky-400 shadow-sm">
@@ -41,20 +54,7 @@ export default function HeadLogo() {
       {/* Search bar */}
       <div className="flex-1 mx-6">
         <div className="flex items-center bg-gray-100 px-4 py-2 rounded-full max-w-xl w-full mx-auto">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-gray-500 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"
-            />
-          </svg>
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-500 mr-2" />
           <input
             type="text"
             placeholder="Search ..."
@@ -85,7 +85,6 @@ export default function HeadLogo() {
               {user.name.charAt(0).toUpperCase()}
             </div>
           ) : (
-            // กรณียังไม่ login ใช้รูป default
             <Image
               src="/img/user.png"
               alt="User Profile"
@@ -144,7 +143,7 @@ export default function HeadLogo() {
                 </Link>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="w-full flex items-center gap-x-3 text-left px-3 py-2 text-sm mt-2 hover:bg-red-50 rounded-lg transition"
                 >
                   <ArrowRightOnRectangleIcon className="w-5 h-5" />

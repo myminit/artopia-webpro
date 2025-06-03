@@ -1,18 +1,16 @@
 "use client";
 
-import {
-  HomeIcon,
-  PencilIcon,
-  GlobeAltIcon,
-  ArrowUpTrayIcon,
-  Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
-} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  UserGroupIcon,
+  FlagIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+import { isAdmin } from "@/utils/auth";
 
-export default function Navbar() {
+export default function AdminNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [activePath, setActivePath] = useState("");
@@ -26,9 +24,18 @@ export default function Navbar() {
     // ใช้ httpOnly cookie: fetch ด้วย credentials: "include"
     fetch("/api/auth/me", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setUser(data))
-      .catch(() => setUser(null));
-  }, []);
+      .then((data) => {
+        // ถ้าไม่ใช่ admin ให้ redirect ออก
+        setUser(data);
+        if (!data || !isAdmin(data)) {
+          router.push("/");
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        router.push("/login");
+      });
+  }, [router]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -37,30 +44,24 @@ export default function Navbar() {
   };
 
   const navItems = [
-    { name: "Home", icon: HomeIcon, href: "/" },
-    { name: "Draw", icon: PencilIcon, href: "/draw" },
-    { name: "Community", icon: GlobeAltIcon, href: "/community" },
-    { name: "Upload", icon: ArrowUpTrayIcon, href: "/upload" },
-    { name: "Account setting", icon: Cog6ToothIcon, href: "/settings" },
+    { name: "Users", icon: UserGroupIcon, href: "/admin/user" },
+    { name: "Reports", icon: FlagIcon, href: "/admin/report" },
   ];
 
   return (
-    <nav className="w-72 h-[calc(100vh-70px)] bg-sky-400 text-white px-4 py-6 flex flex-col justify-between">
-      {/* Top Menu */}
-      <div className="space-y-4 ">
+    <nav className="w-72 h-[calc(100vh-70px)] bg-purple-400 text-white px-4 py-6 flex flex-col justify-between">
+      <div className="space-y-4">
         {navItems.map((item) => {
-          //const isActive = activePath === item.href;
           const isActive =
-            activePath === item.href || activePath.startsWith(item.href + "/");
-
+            activePath === item.href || activePath.startsWith(item.href + "/");        
           return (
             <Link
               key={item.name}
               href={item.href}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
                 isActive
-                  ? "bg-white text-sky-500 font-medium"
-                  : "hover:bg-sky-300/40"
+                  ? "bg-white text-purple-700 font-medium"
+                  : "hover:bg-purple-600/70"
               }`}
             >
               <item.icon className="w-5 h-5" />
@@ -70,11 +71,10 @@ export default function Navbar() {
         })}
       </div>
 
-      {/* Logout */}
       <div>
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-2 px-4 py-2 text-white hover:bg-sky-300/40 rounded-lg transition w-full"
+          className="flex items-center space-x-2 px-4 py-2 text-white hover:bg-purple-600/70 rounded-lg transition w-full"
         >
           <ArrowRightOnRectangleIcon className="w-5 h-5" />
           <span>Logout</span>

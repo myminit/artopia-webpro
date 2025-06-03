@@ -13,6 +13,8 @@ export interface IUser extends Document {
   verificationOTPExpires: Date | null;
   bio?: string; 
   avatar?: string; 
+  status: 'active' | 'banned'; 
+  banUntil?: Date | null; 
 }
 
 const UserSchema = new Schema<IUser>({
@@ -27,8 +29,11 @@ const UserSchema = new Schema<IUser>({
   verificationOTPExpires: { type: Date, default: null },
   bio: { type: String, default: '' },
   avatar: { type: String, default: '' },
+  status: { type: String, enum: ['active', 'banned'], default: 'active' },
+  banUntil: { type: Date, default: null },
 }, { timestamps: true });
 
 const User = models.User || model<IUser>('User', UserSchema);
+
 
 export default User;

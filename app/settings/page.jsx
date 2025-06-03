@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { CameraIcon } from "@heroicons/react/24/outline";
-import Navbar from "@/components/Navbar";
-import HeadLogo from "@/components/HeadLogo";
-import { useAuth } from "@/context/AuthContext";
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 
 export default function AccountSetting() {
   const [profileImage, setProfileImage] = useState("/default-profile.jpg");
-  const { user, loading } = useAuth();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -17,6 +17,23 @@ export default function AccountSetting() {
     confirmPassword: "",
     bio: "",
   });
+
+  useEffect(() => {
+    // ต้องการ auth (เพราะต้องรู้ user ที่ login)
+    // แต่ปัจจุบัน fetch ยังไม่ได้ใส่ { credentials: "include" }
+    fetch("/api/auth/me", {
+      credentials: "include", // เพิ่มบรรทัดนี้
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
