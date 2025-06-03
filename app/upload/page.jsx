@@ -2,8 +2,8 @@
 'use client';
 import { useState, useRef } from 'react';
 import { PhotoIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
-import Navbar from '@/components/Navbar';
-import HeadLogo from '@/components/HeadLogo';
+import Navbar from "@/components/navbar";
+import HeadLogo from "@/components/headLogo";
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 

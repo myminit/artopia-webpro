@@ -4,10 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Image from 'next/image';
-import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
-  const { login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,24 +16,27 @@ export default function LoginPage() {
   const [generalError, setGeneralError] = useState('');
 
   const handleLogin = async () => {
-    // เคลียร์ error ก่อนส่ง
     setEmailError('');
     setPasswordError('');
     setGeneralError('');
 
-    /*try {
+    try {
       const loginResponse = await axios.post('/api/auth/login', { email, password });
-      
-      if (loginResponse.data.token) {
-        localStorage.setItem('token', loginResponse.data.token);
+      const token = loginResponse.data.token;
 
-        const me = await axios.get('/api/auth/me', {
-          headers: {
-            Authorization: `Bearer ${loginResponse.data.token}`,
-          },
+      if (token) {
+        // ไม่ต้องเก็บ token ใน localStorage และไม่ต้องส่ง Authorization header
+        // ให้ใช้ httpOnly cookie ที่ server set ให้หลัง login สำเร็จ
+
+        // ดึง user/me เพื่อเช็ค role (ใช้ credentials: "include" เพื่อส่ง cookie)
+        const meRes = await axios.get('/api/auth/me', {
+          withCredentials: true,
         });
+        const role = meRes.data?.role;
 
-        if (me.data.role === 'admin' || me.data.role === 'user') {
+        if (role === 'admin') {
+          router.push('/admin/user');
+        } else if (role === 'user') {
           router.push('/');
         } else {
           setGeneralError('Unknown role');
@@ -43,38 +44,6 @@ export default function LoginPage() {
       } else {
         setGeneralError('Login failed: No token received');
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed';
-      if (message.toLowerCase().includes('email')) {
-        setEmailError(message);
-      } else if (message.toLowerCase().includes('password')) {
-        setPasswordError(message);
-      } else {
-        setGeneralError(message);
-      }
-    }
-  };*/
-  //ประกาศ login(token) ใน AuthContext ไว้แล้วควรใช้ login(token) นั้นเพื่อให้ Context อัปเดต user ให้ทันที
-  try {
-    const loginResponse = await axios.post('/api/auth/login', { email, password });
-
-    const token = loginResponse.data.token;
-
-    if (token) {
-      localStorage.setItem('token', token);
-
-      // เรียก login จาก useAuth เพื่อโหลด user เข้าสู่ context
-      await login(token);
-
-      // เช็ก role หลัง login() เพื่อ redirect
-      if (loginResponse.data.user?.role === 'admin' || loginResponse.data.user?.role === 'user') {
-        router.push('/');
-      } else {
-        setGeneralError('Unknown role');
-      }
-    } else {
-      setGeneralError('Login failed: No token received');
-    }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed';
       if (message.toLowerCase().includes('email')) {

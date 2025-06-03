@@ -18,6 +18,7 @@ import {
 export default function PostDetailPage() {
   const { postid } = useParams();
   const router = useRouter();
+  
 
   const [post, setPost] = useState(null);
   const [hearted, setHearted] = useState(false);
