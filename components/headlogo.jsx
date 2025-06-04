@@ -37,10 +37,22 @@ export default function HeadLogo() {
   }, []);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    setUser(null);
-    setShowDropdown(false);
-    router.push("/");
+    try {
+      const res = await fetch("/api/auth/logout", { 
+        method: "POST", 
+        credentials: "include" 
+      });
+      
+      if (res.ok) {
+        setUser(null);
+        setShowDropdown(false);
+        router.push("/login");
+      } else {
+        console.error("Logout failed:", res.status);
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
   return (
@@ -69,34 +81,19 @@ export default function HeadLogo() {
           onClick={() => setShowDropdown(!showDropdown)}
           className="flex items-center space-x-2 px-3 py-2 rounded-lg transition duration-200"
         >
-          {user?.avatar && user.avatar !== "" ? (
-            <Image
-              src={user.avatar}
-              alt="User Profile"
-              width={42}
-              height={42}
-              className="rounded-full"
-            />
-          ) : user ? (
-            <div
-              className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold select-none text-lg"
-              title={user.name}
-            >
-              {user.name.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2">
+            <div className="relative w-8 h-8 rounded-full overflow-hidden">
+              <Image
+                src={user?.avatar || "https://api.dicebear.com/7.x/bottts/svg?seed=1"}
+                alt="User Profile"
+                fill
+                sizes="32px"
+                className="object-cover"
+                priority
+              />
             </div>
-          ) : (
-            <Image
-              src="/img/user.png"
-              alt="User Profile"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-          )}
-
-          <span className="text-black text-xl font-medium">
-            {user ? user.name : "Guest"}
-          </span>
+            <span className="text-black">{user?.name || 'Guest'}</span>
+          </div>
         </button>
 
         {showDropdown && (
@@ -105,29 +102,23 @@ export default function HeadLogo() {
               <>
                 {/* Logged-in user info */}
                 <div className="flex items-center gap-x-4 mb-4">
-                  {user.avatar && user.avatar !== "" ? (
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border border-sky-200">
                     <Image
-                      src={user.avatar}
+                      src={user?.avatar || "https://api.dicebear.com/7.x/bottts/svg?seed=1"}
                       alt="Profile"
-                      width={48}
-                      height={48}
-                      className="rounded-full border border-sky-200"
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                      priority
                     />
-                  ) : (
-                    <div
-                      className="w-12 h-12 rounded-full border border-sky-200 bg-sky-500 flex items-center justify-center text-white font-bold text-xl select-none"
-                      title={user.name}
-                    >
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  </div>
                   <div>
                     <div className="font-semibold text-base text-gray-800">
                       {user.name}
                     </div>
                     <div className="text-sm text-gray-500">{user.email}</div>
                     <div className="text-xs text-gray-400 mt-1 italic">
-                      Passionate about AI & Art 🎨🤖
+                      Passionate about Art 🎨
                     </div>
                   </div>
                 </div>
@@ -154,13 +145,16 @@ export default function HeadLogo() {
               <>
                 {/* Guest / Not logged-in */}
                 <div className="flex flex-col items-center text-center space-y-4 p-4">
-                  <Image
-                    src="/img/user.png"
-                    alt="Guest"
-                    width={56}
-                    height={56}
-                    className="rounded-full border border-gray-300 shadow-sm"
-                  />
+                  <div className="relative w-14 h-14 rounded-full overflow-hidden border border-gray-300 shadow-sm">
+                    <Image
+                      src="/img/user.png"
+                      alt="Guest"
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
 
                   <div className="space-y-1">
                     <h3 className="text-lg font-semibold text-gray-800">

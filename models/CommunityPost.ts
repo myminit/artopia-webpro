@@ -19,6 +19,7 @@ interface IReply {
   _id:       string;
   userId:    string;
   userName:  string;
+  userAvatar?: string;
   text:      string;
   createdAt: Date;
   likes:     string[];      // เก็บ userId ของคนที่กด Like reply
@@ -32,6 +33,7 @@ interface IComment {
   _id:       string;
   userId:    string;
   userName:  string;
+  userAvatar?: string;
   text:      string;
   createdAt: Date;
   likes:     string[];      // เก็บ userId ของคนที่กด Like comment
@@ -45,6 +47,7 @@ interface IComment {
 export interface ICommunityPost extends Document {
   userId:       string;
   userName:     string;
+  userAvatar?:  string;
   caption:      string;
   imageUrl:     string;
   thumbnailUrl: string;
@@ -73,6 +76,7 @@ const ReplySchema = new Schema<IReply>({
   _id:        { type: String, required: true },
   userId:     { type: String, required: true },
   userName:   { type: String, required: true },
+  userAvatar: { type: String, default: '' },
   text:       { type: String, required: true },
   createdAt:  { type: Date,   required: true },
   likes:      { type: [String], default: [] },
@@ -86,6 +90,7 @@ const CommentSchema = new Schema<IComment>({
   _id:        { type: String, required: true },
   userId:     { type: String, required: true },
   userName:   { type: String, required: true },
+  userAvatar: { type: String, default: '' },
   text:       { type: String, required: true },
   createdAt:  { type: Date,   required: true },
   likes:      { type: [String], default: [] },
@@ -99,6 +104,7 @@ const CommentSchema = new Schema<IComment>({
 const CommunityPostSchema = new Schema<ICommunityPost>({
   userId:       { type: String, required: true },
   userName:     { type: String, required: true },
+  userAvatar:   { type: String, default: '' },
   caption:      { type: String, required: true },
   imageUrl:     { type: String, required: true },
   thumbnailUrl: { type: String, required: true },

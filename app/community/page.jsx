@@ -166,7 +166,14 @@ export default function CommunityFeed() {
               <Link key={post._id} href={`/community/${post._id}`} passHref>
                 <div className="relative bg-white rounded-lg shadow-sm hover:shadow-lg transition cursor-pointer">
                   <div className="bg-[#00AEEF] text-white flex items-center justify-between px-4 py-2 rounded-t-lg">
-                    <span className="font-medium text-sm">{post.userName}</span>
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={post.userAvatar || "/img/default-avatar.png"}
+                        alt={post.userName}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                      <span className="font-medium text-sm">{post.userName}</span>
+                    </div>
 
                     <div className="relative">
                       <button

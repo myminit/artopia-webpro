@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Navbar from "@/components/navbar";
 import HeadLogo from "@/components/headLogo";
+import Image from "next/image";
 import {
   HeartIcon as HeartIconSolid,
   HeartIcon as HeartIconOutline,
@@ -33,30 +34,56 @@ export default function PostDetailPage() {
   // เพิ่ม state สำหรับ guest alert popup
   const [showGuestAlert, setShowGuestAlert] = useState(false);
 
-  // ── 1. โหลดข้อมูลโพสต์พร้อมคอมเมนต์เมื่อ mount ──────────────────────────
-  // ── 2. โหลดข้อมูล user และโพสต์เมื่อ mount ──────────────────────────
+  // ฟังก์ชันสำหรับโหลดข้อมูลโพสต์และคอมเมนต์
+  const loadPostAndComments = async () => {
+    try {
+      // โหลดข้อมูลโพสต์
+      const postRes = await fetch(`/api/community/${postid}`, {
+        credentials: "include",
+      });
+      if (!postRes.ok) return;
+      const postData = await postRes.json();
+      setPost(postData);
+
+      // โหลดข้อมูล comments พร้อม user data
+      const commentsRes = await fetch(`/api/community/${postid}/comment`, {
+        credentials: "include",
+      });
+      if (!commentsRes.ok) return;
+      const { comments: commentsData } = await commentsRes.json();
+
+      // โหลด replies พร้อม user data สำหรับแต่ละ comment
+      for (const comment of commentsData) {
+        const repliesRes = await fetch(
+          `/api/community/${postid}/comment/${comment._id}/reply`,
+          {
+            credentials: "include",
+          }
+        );
+        if (repliesRes.ok) {
+          const { replies } = await repliesRes.json();
+          comment.replies = replies;
+        }
+      }
+
+      setComments(commentsData);
+    } catch (err) {
+      console.error("Fetch post detail failed:", err);
+    }
+  };
+
+  // Effect สำหรับโหลดข้อมูล user และตั้ง interval สำหรับรีเฟรชข้อมูล
   useEffect(() => {
-    // ดึงข้อมูล userAdd commentMore actions
+    // ดึงข้อมูล user
     fetch("/api/auth/me", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setUser(data))
       .catch(() => setUser(null));
+
     if (!postid) return;
-    (async () => {
-      try {
-        const res = await fetch(`/api/community/${postid}`, {
-          credentials: "include",
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setPost(data);
-        setComments(data.comments || []);
-        // ไม่ได้เช็กว่า user เคยกดไลค์โพสต์นี้หรือยัง, กำหนด default เป็น false
-        setHearted(false);
-      } catch (err) {
-        console.error("Fetch post detail failed:", err);
-      }
-    })();
+
+    // โหลดข้อมูลครั้งแรก
+    loadPostAndComments();
   }, [postid]);
 
   // ฟังก์ชันตรวจสอบว่าเป็น guest user หรือไม่
@@ -159,6 +186,7 @@ export default function PostDetailPage() {
     if (!textTrim) return;
 
     try {
+      // ส่ง comment ไปที่ API
       const res = await fetch(`/api/community/${post._id}/comment`, {
         method: "POST",
         credentials: "include",
@@ -167,7 +195,19 @@ export default function PostDetailPage() {
       });
       if (!res.ok) return;
       const c = await res.json();
-      setComments((arr) => [...arr, { ...c, likes: [], replies: [] }]);
+
+      // ดึงข้อมูล comments ล่าสุดมาใช้
+      const commentsRes = await fetch(`/api/community/${post._id}/comment`, {
+        credentials: "include",
+      });
+      if (commentsRes.ok) {
+        const { comments: commentsData } = await commentsRes.json();
+        setComments(commentsData);
+      } else {
+        // ถ้าดึงข้อมูลล่าสุดไม่ได้ ค่อยใช้ข้อมูลจาก response แรก
+        setComments((arr) => [...arr, { ...c, likes: [], replies: [] }]);
+      }
+      
       setNewComment("");
     } catch (err) {
       console.error("Submit comment failed:", err);
@@ -184,6 +224,7 @@ export default function PostDetailPage() {
     if (!textTrim) return;
 
     try {
+      // ส่ง reply ไปที่ API
       const res = await fetch(
         `/api/community/${post._id}/comment/${parentCommentId}/reply`,
         {
@@ -195,16 +236,39 @@ export default function PostDetailPage() {
       );
       if (!res.ok) return;
       const r = await res.json();
-      // เก็บ reply ใหม่ใน state
-      setComments((prev) =>
-        prev.map((c) => {
-          if (c._id === parentCommentId) {
-            const oldReplies = c.replies || [];
-            return { ...c, replies: [...oldReplies, { ...r, likes: [] }] };
-          }
-          return c;
-        })
+
+      // ดึงข้อมูล replies ล่าสุดมาใช้
+      const repliesRes = await fetch(
+        `/api/community/${post._id}/comment/${parentCommentId}/reply`,
+        {
+          credentials: "include",
+        }
       );
+
+      if (repliesRes.ok) {
+        const { replies } = await repliesRes.json();
+        // อัพเดท replies ของ comment นั้น
+        setComments((prev) =>
+          prev.map((c) => {
+            if (c._id === parentCommentId) {
+              return { ...c, replies };
+            }
+            return c;
+          })
+        );
+      } else {
+        // ถ้าดึงข้อมูลล่าสุดไม่ได้ ค่อยใช้ข้อมูลจาก response แรก
+        setComments((prev) =>
+          prev.map((c) => {
+            if (c._id === parentCommentId) {
+              const oldReplies = c.replies || [];
+              return { ...c, replies: [...oldReplies, { ...r, likes: [] }] };
+            }
+            return c;
+          })
+        );
+      }
+
       setReplyText((prev) => ({ ...prev, [parentCommentId]: "" }));
     } catch (err) {
       console.error("Submit reply failed:", err);
@@ -280,7 +344,16 @@ export default function PostDetailPage() {
                 />
                 <div className="mt-4 flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-purple-500"></div>
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        src={post.userAvatar || "https://api.dicebear.com/7.x/bottts/svg?seed=1"}
+                        alt={post.userName}
+                        fill
+                        sizes="32px"
+                        className="object-cover"
+                        priority
+                      />
+                    </div>
                     <span className="font-semibold">{post.userName}</span>
                   </div>
 
@@ -323,10 +396,17 @@ export default function PostDetailPage() {
                     <div key={c._id} className="mb-2">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-purple-500"></div>
-                          <span className="font-semibold text-sm">
-                            {c.userName}
-                          </span>
+                          <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                            <Image
+                              src={c.userAvatar || "https://api.dicebear.com/7.x/bottts/svg?seed=2"}
+                              alt={c.userName}
+                              fill
+                              sizes="24px"
+                              className="object-cover"
+                              priority
+                            />
+                          </div>
+                          <span className="font-semibold text-sm">{c.userName}</span>
                         </div>
 
                         {/* ... vertical icon */}
@@ -361,10 +441,17 @@ export default function PostDetailPage() {
                         <div key={r._id} className="ml-6 mt-2 mb-2">
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                              <div className="w-5 h-5 rounded-full bg-purple-400"></div>
-                              <span className="font-semibold text-xs">
-                                {r.userName}
-                              </span>
+                              <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                                <Image
+                                  src={r.userAvatar || "https://api.dicebear.com/7.x/bottts/svg?seed=3"}
+                                  alt={r.userName}
+                                  fill
+                                  sizes="20px"
+                                  className="object-cover"
+                                  priority
+                                />
+                              </div>
+                              <span className="font-semibold text-xs">{r.userName}</span>
                             </div>
                             <button
                               onClick={() => openReport(r._id)}

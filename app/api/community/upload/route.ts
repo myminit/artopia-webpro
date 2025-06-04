@@ -49,34 +49,32 @@ export async function POST(req: NextRequest) {
     const s3Client = new S3Client({
       region: REGION,
       credentials: {
-        accessKeyId:     ACCESS_KEY,
+        accessKeyId: ACCESS_KEY,
         secretAccessKey: SECRET_KEY,
       },
     });
 
     // สร้างชื่อไฟล์ (userId + timestamp + random)
-    const mimeType    = file.type; // เช่น image/png
-    const extParts    = mimeType.split('/');
-    const fileExt     = extParts.length === 2 ? extParts[1] : 'png';
-    const timestamp   = Date.now();
-    const randomStr   = Math.random().toString(36).substring(2, 8);
-    const baseName    = `${userId}-${timestamp}-${randomStr}`;
-    const keyFull     = `community/${baseName}.${fileExt}`;
+    const mimeType = file.type;
+    const extParts = mimeType.split('/');
+    const fileExt = extParts.length === 2 ? extParts[1] : 'png';
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    const baseName = `${userId}-${timestamp}-${randomStr}`;
+    const keyFull = `posts/${baseName}.${fileExt}`;
 
     // แปลง File → ArrayBuffer → Buffer
     const arrayBuffer = await file.arrayBuffer();
-    const bufferBody  = Buffer.from(arrayBuffer);
+    const bufferBody = Buffer.from(arrayBuffer);
 
-    // 4) อัปโหลดไฟล์ขึ้น S3 (ไม่ใส่ ACL)
+    // 4) อัปโหลดไฟล์ขึ้น S3
     let publicUrl: string;
     try {
       const uploadParams: PutObjectCommandInput = {
-        Bucket:      BUCKET_NAME,
-        Key:         keyFull,
-        Body:        bufferBody,       // Buffer ของ Node.js
+        Bucket: BUCKET_NAME,
+        Key: keyFull,
+        Body: bufferBody,
         ContentType: mimeType,
-        // ** ลบ ACL: 'public-read' ทิ้งไป เพราะ bucket ไม่อนุญาต ACL **
-        // ACL: 'public-read',
       };
 
       const command = new PutObjectCommand(uploadParams);
@@ -92,11 +90,13 @@ export async function POST(req: NextRequest) {
     // 5) เชื่อมต่อ MongoDB
     await connectDB();
 
-    // 6) ดึงชื่อผู้ใช้จาก MongoDB (User.name)
-    let userName: string;
+    // 6) ดึงข้อมูล user จาก DB
+    let userName = userRole;
+    let userAvatar = '';
     try {
       const userDoc = (await User.findById(userId).lean()) as IUser | null;
       userName = userDoc?.name || userRole;
+      userAvatar = userDoc?.avatar || '';
     } catch (err) {
       console.error('Failed to fetch user from DB:', err);
       userName = userRole;
@@ -106,6 +106,7 @@ export async function POST(req: NextRequest) {
     const newPost = await CommunityPost.create({
       userId:       new mongoose.Types.ObjectId(userId),
       userName:     userName,
+      userAvatar:   userAvatar,
       caption:      caption,
       imageUrl:     publicUrl,
       thumbnailUrl: publicUrl,      // ถ้าจะทำ thumb จริง ๆ ให้ปรับ logic แยกส่วนอีกที
@@ -122,6 +123,7 @@ export async function POST(req: NextRequest) {
         thumbnailUrl: newPost.thumbnailUrl,
         caption:      newPost.caption,
         userName:     newPost.userName,
+        userAvatar:   newPost.userAvatar,
         createdAt:    newPost.createdAt,
       },
       { status: 201 }

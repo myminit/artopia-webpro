@@ -17,22 +17,40 @@ export default function Adminuserid() {
     const [user, setUser] = useState(null);
     const [banUntil, setBanUntil] = useState("");
     const [loading, setLoading] = useState(true);
+    const [reports, setReports] = useState([]);
+    const [banDuration, setBanDuration] = useState("7"); // default 7 days
 
-  const [reports, setReports] = useState([]);
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch(`/api/admin/user/${userId}`, {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("โหลดข้อมูลผู้ใช้ล้มเหลว");
+        const [userRes, reportsRes] = await Promise.all([
+          fetch(`/api/admin/user/${userId}`, {
+            credentials: "include",
+          }),
+          fetch(`/api/admin/report`, {
+            credentials: "include",
+          })
+        ]);
 
-        const data = await res.json();
-        setUser(data);
-        setBanUntil(data.banUntil ? data.banUntil.slice(0, 10) : ""); // format YYYY-MM-DD
+        if (!userRes.ok) {
+          const errorText = await userRes.text();
+          throw new Error(errorText || "โหลดข้อมูลผู้ใช้ล้มเหลว");
+        }
+
+        const userData = await userRes.json();
+        console.log("Initial user data:", userData);
+        console.log("User status:", userData.status);
+        setUser(userData);
+        setBanUntil(userData.banUntil ? userData.banUntil.slice(0, 10) : "");
+
+        if (reportsRes.ok) {
+          const reportsData = await reportsRes.json();
+          const userReports = reportsData.filter(r => r.reportUserId === userId);
+          setReports(userReports);
+        }
       } catch (err) {
-        console.error(err);
-        alert("ไม่สามารถโหลดข้อมูลได้");
+        console.error("Error in fetchUser:", err);
+        alert(err.message || "ไม่สามารถโหลดข้อมูลได้");
       } finally {
         setLoading(false);
       }
@@ -41,44 +59,60 @@ export default function Adminuserid() {
     fetchUser();
   }, [userId]);
 
-  const handleBanUpdate = async () => {
+  const handleBanUpdate = async (action) => {
     try {
-      const res = await fetch(`/api/admin/user/${userid}`, {
+      console.log("Current user before update:", user);
+      console.log("Current status before update:", user?.status);
+      console.log("Attempting action:", action);
+
+      let banUntilDate = null;
+      if (action === "ban") {
+        if (banDuration === "permanent") {
+          banUntilDate = new Date(2100, 0, 1).toISOString(); // Very far future date
+        } else {
+          banUntilDate = new Date(Date.now() + parseInt(banDuration) * 24 * 60 * 60 * 1000).toISOString();
+        }
+      }
+
+      const res = await fetch(`/api/admin/user/${userId}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          isBanned: true,
-          banUntil: banUntil ? new Date(banUntil).toISOString() : null,
+          action,
+          banUntil: banUntilDate,
         }),
       });
 
-      if (!res.ok) throw new Error("อัปเดตข้อมูลล้มเหลว");
-
-      const updated = await res.json();
-      setUser(updated);
-      alert("บันทึกการแบนแล้ว");
-    } catch (err) {
-      console.error(err);
-      alert("บันทึกไม่สำเร็จ");
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "อัปเดตข้อมูลล้มเหลว");
+      }
+      
+      const updatedUser = await res.json();
+      console.log("Updated user data:", updatedUser);
+      console.log("New status:", updatedUser.status);
+      setUser(updatedUser);
+      alert(`${action === "ban" ? `แบนผู้ใช้เป็นเวลา ${banDuration === 'permanent' ? 'ถาวร' : banDuration + ' วัน'} สำเร็จ` : "ปลดแบนผู้ใช้สำเร็จ"}`);
+    } catch (error) {
+      console.error("Error in handleBanUpdate:", error);
+      alert(error.message || "อัปเดตสถานะผู้ใช้ไม่สำเร็จ");
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("ลบผู้ใช้นี้จริงหรือไม่?")) return;
-
     try {
-      const res = await fetch(`/api/admin/user/${userid}`, {
+      const res = await fetch(`/api/admin/user/${userId}`, {
         method: "DELETE",
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("ลบไม่สำเร็จ");
+      if (!res.ok) throw new Error("ลบผู้ใช้ไม่สำเร็จ");
 
-      alert("ลบผู้ใช้เรียบร้อยแล้ว");
+      alert("ลบผู้ใช้สำเร็จ");
       router.push("/admin/user");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       alert("ลบผู้ใช้ไม่สำเร็จ");
     }
   };
@@ -169,25 +203,57 @@ export default function Adminuserid() {
                 <tbody>
                   {reports.map((report) => (
                     <tr
-                      key={report.id}
+                      key={report._id}
                       className="text-center hover:bg-gray-50"
                     >
-                      <td className="p-3">{report.id}</td>
+                      <td className="p-3">{report._id}</td>
                       <td className="p-3">{report.byUserId}</td>
                       <td className="p-3">{report.reportUserId}</td>
-                      <td className="p-3 text-sm">{report.lastUpdate}</td>
+                      <td className="p-3 text-sm">
+                        {new Date(report.updatedAt).toLocaleString()}
+                      </td>
                       <td className="p-3">
                         <div className="flex justify-center space-x-2">
-                          <button title="Edit">
+                          <button 
+                            title="Edit"
+                            onClick={() => router.push(`/admin/report/${report._id}`)}
+                          >
                             <PencilIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
                           </button>
-                          <button title="Delete">
+                          <button 
+                            title="Delete"
+                            onClick={async () => {
+                              if (!confirm("ต้องการลบรายงานนี้หรือไม่?")) return;
+                              try {
+                                const res = await fetch(`/api/admin/report/${report._id}`, {
+                                  method: "DELETE",
+                                  credentials: "include"
+                                });
+                                if (res.ok) {
+                                  setReports(reports.filter(r => r._id !== report._id));
+                                  alert("ลบรายงานสำเร็จ");
+                                } else {
+                                  throw new Error("Failed to delete report");
+                                }
+                              } catch (error) {
+                                console.error(error);
+                                alert("ลบรายงานไม่สำเร็จ");
+                              }
+                            }}
+                          >
                             <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer" />
                           </button>
                         </div>
                       </td>
                     </tr>
                   ))}
+                  {reports.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center py-4">
+                        ไม่พบรายงาน
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -206,17 +272,63 @@ export default function Adminuserid() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-start space-x-4 mt-6">
-            <button className="bg-yellow-400 text-black font-semibold py-1 px-6 rounded">
-              Ban
-            </button>
-            <button className="bg-sky-400 text-white font-semibold py-1 px-6 rounded">
-              UnBan
-            </button>
-            <button className="bg-red-500 text-white font-semibold py-1 px-6 rounded">
-              Delete
-            </button>
+          {/* Bottom Action Buttons */}
+          <div className="bg-white rounded-xl p-4 shadow">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                {user?.status === "banned" ? (
+                  <button 
+                    onClick={() => {
+                      if (window.confirm("ต้องการปลดแบนผู้ใช้นี้หรือไม่?")) {
+                        handleBanUpdate("unban");
+                      }
+                    }}
+                    className="bg-sky-400 text-white font-semibold py-2 px-6 rounded hover:bg-sky-500 transition"
+                  >
+                    UnBan
+                  </button>
+                ) : (
+                  <>
+                    <div className="flex items-center space-x-4">
+                      <label className="text-gray-600 whitespace-nowrap">ระยะเวลาแบน:</label>
+                      <select 
+                        value={banDuration} 
+                        onChange={(e) => setBanDuration(e.target.value)}
+                        className="border rounded px-3 py-2"
+                      >
+                        <option value="1">1 วัน</option>
+                        <option value="3">3 วัน</option>
+                        <option value="7">7 วัน</option>
+                        <option value="15">15 วัน</option>
+                        <option value="30">30 วัน</option>
+                        <option value="90">90 วัน</option>
+                        <option value="permanent">ถาวร</option>
+                      </select>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (window.confirm(`ต้องการแบนผู้ใช้นี้เป็นเวลา ${banDuration === 'permanent' ? 'ถาวร' : banDuration + ' วัน'} หรือไม่?`)) {
+                          handleBanUpdate("ban");
+                        }
+                      }}
+                      className="bg-yellow-400 text-black font-semibold py-2 px-6 rounded hover:bg-yellow-500 transition"
+                    >
+                      Ban
+                    </button>
+                  </>
+                )}
+              </div>
+              <button 
+                onClick={() => {
+                  if (window.confirm("ต้องการลบผู้ใช้นี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้")) {
+                    handleDelete();
+                  }
+                }}
+                className="bg-red-500 text-white font-semibold py-2 px-6 rounded hover:bg-red-600 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>

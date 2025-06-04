@@ -15,7 +15,8 @@ export default function LoginPage() {
   const [passwordError, setPasswordError] = useState('');
   const [generalError, setGeneralError] = useState('');
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setEmailError('');
     setPasswordError('');
     setGeneralError('');
@@ -25,10 +26,6 @@ export default function LoginPage() {
       const token = loginResponse.data.token;
 
       if (token) {
-        // ไม่ต้องเก็บ token ใน localStorage และไม่ต้องส่ง Authorization header
-        // ให้ใช้ httpOnly cookie ที่ server set ให้หลัง login สำเร็จ
-
-        // ดึง user/me เพื่อเช็ค role (ใช้ credentials: "include" เพื่อส่ง cookie)
         const meRes = await axios.get('/api/auth/me', {
           withCredentials: true,
         });
@@ -46,7 +43,11 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed';
-      if (message.toLowerCase().includes('email')) {
+      
+      if (error.response?.status === 403) {
+        // Banned user error
+        setGeneralError(message);
+      } else if (message.toLowerCase().includes('email')) {
         setEmailError(message);
       } else if (message.toLowerCase().includes('password')) {
         setPasswordError(message);
@@ -63,7 +64,7 @@ export default function LoginPage() {
         <h1 className="text-white text-3xl font-bold mt-2">Artopia</h1>
       </div>
 
-      <div className="bg-white p-8 rounded-lg mt-6 w-96">
+      <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg mt-6 w-96">
         <h2 className="text-center text-2xl font-semibold mb-6">Sign in</h2>
 
         {generalError && (
@@ -77,6 +78,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="border w-full p-2 rounded"
+            required
           />
           {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
         </div>
@@ -88,6 +90,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="border w-full p-2 rounded"
+            required
           />
           <button
             type="button"
@@ -100,7 +103,7 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={handleLogin}
+          type="submit"
           className="bg-sky-400 w-full py-2 text-white rounded font-semibold"
         >
           Log in
@@ -122,7 +125,7 @@ export default function LoginPage() {
         >
           Create an account
         </a>
-      </div>
+      </form>
     </div>
   );
 }
