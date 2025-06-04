@@ -128,12 +128,12 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-          {/* HeadLogo */}
-          <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
+        {/* HeadLogo */}
+        <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
             <HeadLogo />
-          </div>
+        </div>
 
-          <div className="flex pt-[70px]">
+        <div className="flex pt-[70px]">
         {/* Navbar */}
         <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
           <Navbar />

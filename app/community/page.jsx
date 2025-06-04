@@ -10,16 +10,26 @@ import {
   HeartIcon as HeartIconSolid,
   HeartIcon as HeartIconOutline,
   FlagIcon as FlagIconOutline,
-} from '@heroicons/react/24/outline';
+  EllipsisVerticalIcon,
+  ChatBubbleBottomCenterTextIcon as CommentIconOutline,
+} from "@heroicons/react/24/outline";
 
 export default function CommunityFeed() {
   const [posts, setPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState({});
   const [loading, setLoading] = useState(true);
+  const [menuOpenId, setMenuOpenId] = useState(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportPostId, setReportPostId] = useState(null);
   const [reportReason, setReportReason] = useState('');
   const [reportDetail, setReportDetail] = useState('');
+  
+
+  const toggleMenu = (e, postId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuOpenId((prevId) => (prevId === postId ? null : postId));
+  };
 
   useEffect(() => {
     (async () => {
@@ -117,28 +127,49 @@ export default function CommunityFeed() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <HeadLogo />
+    <div className="min-h-screen ">
+      <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
+        <HeadLogo />
+      </div>
 
-      <div className="flex pt-[60px]">
-        <aside className="fixed top-[60px] left-0 h-[calc(100vh-60px)] w-60 bg-[#00AEEF] text-white shadow-lg z-40">
+      <div className="flex pt-[70px] h-screen">
+        {/* Navbar */}
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
           <Navbar />
-        </aside>
+        </div>
 
-        <main className="ml-60 flex-1 p-6">
-          <h2 className="text-3xl font-bold mb-6">Artopia Community</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <main className="ml-72 flex-1 overflow-y-auto px-6 py-4 bg-white">
+          <h2 className="text-4xl font-bold text-black mb-6">Community</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {posts.map((post) => (
               <Link key={post._id} href={`/community/${post._id}`} passHref>
                 <div className="relative bg-white rounded-lg shadow-sm hover:shadow-lg transition cursor-pointer">
                   <div className="bg-[#00AEEF] text-white flex items-center justify-between px-4 py-2 rounded-t-lg">
                     <span className="font-medium text-sm">{post.userName}</span>
-                    <button
-                      onClick={(e) => openReport(e, post._id)}
-                      className="hover:opacity-80"
-                    >
-                      <FlagIconOutline className="w-5 h-5" />
-                    </button>
+
+                    <div className="relative">
+                      <button
+                        onClick={(e) => toggleMenu(e, post._id)}
+                        className="hover:opacity-80"
+                      >
+                        <EllipsisVerticalIcon className="w-5 h-5" />
+                      </button>
+
+                      {menuOpenId === post._id && (
+                        <div
+                          className="absolute right-0 mt-2 w-28 bg-white text-black rounded-md shadow-lg z-10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={(e) => openReport(e, post._id)}
+                            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded "
+                          >
+                            <FlagIconOutline className="w-4 h-4 mr-2" />
+                            Report
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="w-full h-40 bg-gray-100 overflow-hidden">
@@ -150,39 +181,29 @@ export default function CommunityFeed() {
                   </div>
 
                   <div className="p-4">
-                    <p className="text-gray-800 text-sm truncate">{post.caption}</p>
+                    <p className="text-gray-800 text-sm truncate">
+                      {post.caption}
+                    </p>
                   </div>
 
                   <div className="px-4 pb-4 flex items-center space-x-6 text-gray-600">
                     <button
                       onClick={(e) => toggleLike(e, post._id)}
-                      className="flex items-center space-x-1 hover:text-red-500"
+                      className="flex items-center space-x-1 text-black"
                     >
                       {likedPosts[post._id] ? (
-                        <HeartIconSolid className="w-5 h-5 text-red-500" />
+                        <HeartIconSolid className="w-5 h-5 fill-current" />
                       ) : (
-                        <HeartIconOutline className="w-5 h-5" />
+                        <HeartIconOutline className="w-5 h-5 " />
                       )}
                       <span className="text-xs">{post.likes.length || 0}</span>
                     </button>
+
                     <div className="flex items-center space-x-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M8 10h.01M12 10h.01M16 10h.01M9 16h6m2 4H7a2 
-                              2 0 01-2-2V7a2 2 0 012-2h5l2 2h5a2 
-                              2 0 012 2v7a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      <span className="text-xs">{post.comments.length || 0}</span>
+                      <CommentIconOutline className="w-5 h-5" />
+                      <span className="text-xs">
+                        {post.comments.length || 0}
+                      </span>
                     </div>
                   </div>
                 </div>
