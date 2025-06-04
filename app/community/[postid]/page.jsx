@@ -1,18 +1,18 @@
 // File: app/community/[postid]/page.jsx
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import Navbar from "@/components/navbar";
 import HeadLogo from "@/components/headLogo";
 import {
   HeartIcon as HeartIconSolid,
   HeartIcon as HeartIconOutline,
-  ChatBubbleBottomCenterTextIcon as CommentIconOutline,  
+  ChatBubbleBottomCenterTextIcon as CommentIconOutline,
   FlagIcon as FlagIconOutline,
   ArrowLeftIcon,
   PaperAirplaneIcon as SendIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 export default function PostDetailPage() {
   const router = useRouter();
@@ -21,20 +21,32 @@ export default function PostDetailPage() {
   const [post, setPost] = useState(null);
   const [hearted, setHearted] = useState(false);
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   // เก็บข้อความ reply ของแต่ละ comment ด้วย object: { [commentId]: replyText }
   const [replyText, setReplyText] = useState({});
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportPostId, setReportPostId] = useState(null);
-  const [reportReason, setReportReason] = useState('');
-  const [reportDetail, setReportDetail] = useState('');
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetail, setReportDetail] = useState("");
+  const [user, setUser] = useState(null);
+
+  // เพิ่ม state สำหรับ guest alert popup
+  const [showGuestAlert, setShowGuestAlert] = useState(false);
 
   // ── 1. โหลดข้อมูลโพสต์พร้อมคอมเมนต์เมื่อ mount ──────────────────────────
+  // ── 2. โหลดข้อมูล user และโพสต์เมื่อ mount ──────────────────────────
   useEffect(() => {
+    // ดึงข้อมูล userAdd commentMore actions
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setUser(data))
+      .catch(() => setUser(null));
     if (!postid) return;
     (async () => {
       try {
-        const res = await fetch(`/api/community/${postid}`, { credentials: 'include' });
+        const res = await fetch(`/api/community/${postid}`, {
+          credentials: "include",
+        });
         if (!res.ok) return;
         const data = await res.json();
         setPost(data);
@@ -42,10 +54,19 @@ export default function PostDetailPage() {
         // ไม่ได้เช็กว่า user เคยกดไลค์โพสต์นี้หรือยัง, กำหนด default เป็น false
         setHearted(false);
       } catch (err) {
-        console.error('Fetch post detail failed:', err);
+        console.error("Fetch post detail failed:", err);
       }
     })();
   }, [postid]);
+
+  // ฟังก์ชันตรวจสอบว่าเป็น guest user หรือไม่
+  const checkGuestUser = () => {
+    if (!user) {
+      setShowGuestAlert(true);
+      return true;
+    }
+    return false;
+  };
 
   if (!post) {
     return (
@@ -65,30 +86,36 @@ export default function PostDetailPage() {
 
   // ── 2. Toggle Like ของตัวโพสต์ ───────────────────────────────────────────
   const toggleLikePost = async () => {
+    // ตรวจสอบ guest user ก่อน
+    if (checkGuestUser()) return;
+
     try {
       await fetch(`/api/community/${post._id}/like`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
       setHearted((h) => !h);
       setPost((p) => ({
         ...p,
         likes: hearted
-          ? p.likes.filter((uid) => uid !== 'dummy')
-          : [...p.likes, 'dummy'],
+          ? p.likes.filter((uid) => uid !== "dummy")
+          : [...p.likes, "dummy"],
       }));
     } catch (err) {
-      console.error('Toggle like post failed:', err);
+      console.error("Toggle like post failed:", err);
     }
   };
 
   // ── 3. Toggle Like ของ comment/reply ใด ๆ ─────────────────────────────────
   // รับ param เป็น commentId หรือ replyId โดยจะค้นใน level-1 หรือ level-2 ก็ได้
   const toggleLikeComment = async (commentId) => {
+    // ตรวจสอบ guest user ก่อน
+    if (checkGuestUser()) return;
+
     try {
       await fetch(`/api/community/${post._id}/comment/${commentId}/like`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
 
       // ปรับค่า local state ให้ตรงกับ API: หา comment/reply แล้วสลับ like ในหน้าเดียว
@@ -97,20 +124,20 @@ export default function PostDetailPage() {
           // 1) ถ้า comment นี้ตรงกับ commentId
           if (c._id === commentId) {
             const likesArr = c.likes || [];
-            if (likesArr.includes('')) {
-              return { ...c, likes: likesArr.filter((x) => x !== '') };
+            if (likesArr.includes("")) {
+              return { ...c, likes: likesArr.filter((x) => x !== "") };
             } else {
-              return { ...c, likes: [...likesArr, ''] };
+              return { ...c, likes: [...likesArr, ""] };
             }
           }
           // 2) ถ้าไม่ใช่ ให้ไปตรวจใน replies
           const newReplies = (c.replies || []).map((r) => {
             if (r._id === commentId) {
               const rLikes = r.likes || [];
-              if (rLikes.includes('')) {
-                return { ...r, likes: rLikes.filter((x) => x !== '') };
+              if (rLikes.includes("")) {
+                return { ...r, likes: rLikes.filter((x) => x !== "") };
               } else {
-                return { ...r, likes: [...rLikes, ''] };
+                return { ...r, likes: [...rLikes, ""] };
               }
             }
             return r;
@@ -119,44 +146,53 @@ export default function PostDetailPage() {
         })
       );
     } catch (err) {
-      console.error('Toggle like comment failed:', err);
+      console.error("Toggle like comment failed:", err);
     }
   };
 
   // ── 4. Submit comment ใหม่ (level-1) ────────────────────────────────────────
   const submitComment = async () => {
+    // ตรวจสอบ guest user ก่อน
+    if (checkGuestUser()) return;
+
     const textTrim = newComment.trim();
     if (!textTrim) return;
 
     try {
       const res = await fetch(`/api/community/${post._id}/comment`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: textTrim }),
       });
       if (!res.ok) return;
       const c = await res.json();
       setComments((arr) => [...arr, { ...c, likes: [], replies: [] }]);
-      setNewComment('');
+      setNewComment("");
     } catch (err) {
-      console.error('Submit comment failed:', err);
+      console.error("Submit comment failed:", err);
     }
   };
 
   // ── 5. Submit reply (level-2) ───────────────────────────────────────────────
   // ถ้าอยากให้ reply ไปอยู่ใต้ comment ใด ให้ส่ง commentId เป็น parent
   const submitReply = async (parentCommentId) => {
-    const textTrim = (replyText[parentCommentId] || '').trim();
+    // ตรวจสอบ guest user ก่อน
+    if (checkGuestUser()) return;
+
+    const textTrim = (replyText[parentCommentId] || "").trim();
     if (!textTrim) return;
 
     try {
-      const res = await fetch(`/api/community/${post._id}/comment/${parentCommentId}/reply`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textTrim }),
-      });
+      const res = await fetch(
+        `/api/community/${post._id}/comment/${parentCommentId}/reply`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: textTrim }),
+        }
+      );
       if (!res.ok) return;
       const r = await res.json();
       // เก็บ reply ใหม่ใน state
@@ -169,39 +205,43 @@ export default function PostDetailPage() {
           return c;
         })
       );
-      setReplyText((prev) => ({ ...prev, [parentCommentId]: '' }));
+      setReplyText((prev) => ({ ...prev, [parentCommentId]: "" }));
     } catch (err) {
-      console.error('Submit reply failed:', err);
+      console.error("Submit reply failed:", err);
     }
   };
 
   // ── 6. เปิด/ปิด Report Modal (ทั้งโพสต์และ comment/reply) ─────────────────
   const openReport = (id) => {
+    // ตรวจสอบ guest user ก่อน
+    if (checkGuestUser()) return;
+
     setReportPostId(id);
     setShowReportModal(true);
   };
+
   const submitReport = async () => {
     if (!reportReason) {
-      alert('กรุณาเลือกเหตุผล');
+      alert("กรุณาเลือกเหตุผล");
       return;
     }
     try {
       await fetch(`/api/community/${post._id}/report`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reason: reportReason,
           detail: reportDetail,
         }),
       });
       setShowReportModal(false);
-      setReportReason('');
-      setReportDetail('');
-      alert('Report ส่งเรียบร้อยแล้ว');
+      setReportReason("");
+      setReportDetail("");
+      alert("Report ส่งเรียบร้อยแล้ว");
     } catch (err) {
-      console.error('Submit report failed:', err);
-      alert('เกิดข้อผิดพลาดในการรายงาน');
+      console.error("Submit report failed:", err);
+      alert("เกิดข้อผิดพลาดในการรายงาน");
     }
   };
 
@@ -393,6 +433,50 @@ export default function PostDetailPage() {
           </div>
         </main>
       </div>
+
+      {/* ── Modal: Guest User Alert ──────────────────────────────────────────── */}
+      {showGuestAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-50">
+          <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl relative">
+            {/* ปุ่มปิด */}
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-semibold"
+              onClick={() => setShowGuestAlert(false)}
+            >
+              &times;
+            </button>
+
+            {/* หัวข้อ */}
+            <h2 className="text-2xl font-semibold text-center mb-4">
+              Login Required
+            </h2>
+
+            {/* ข้อความ */}
+            <p className="text-center text-gray-600 mb-6">
+              Please sign in to interact with posts and comments.
+            </p>
+
+            {/* ปุ่ม */}
+            <div className="flex flex-col gap-3">
+              <button
+                className="w-full bg-sky-400 hover:bg-sky-500 text-white font-semibold py-2 rounded-full"
+                onClick={() => {
+                  setShowGuestAlert(false);
+                  router.push("/login"); // redirect ไปหน้า login
+                }}
+              >
+                Login
+              </button>
+              <button
+                className="w-full bg-sky-100 hover:bg-sky-200 text-gray-700 font-semibold py-2 rounded-full"
+                onClick={() => setShowGuestAlert(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Modal: Report (ใช้กับทั้งโพสต์ และ comment/reply ได้) ────────────────────────── */}
       {showReportModal && (

@@ -23,6 +23,8 @@ export default function CommunityFeed() {
   const [reportPostId, setReportPostId] = useState(null);
   const [reportReason, setReportReason] = useState('');
   const [reportDetail, setReportDetail] = useState('');
+  const [user, setUser] = useState(null);
+  const [showGuestAlert, setShowGuestAlert] = useState(false);
   
 
   const toggleMenu = (e, postId) => {
@@ -32,6 +34,12 @@ export default function CommunityFeed() {
   };
 
   useEffect(() => {
+    // Fetch user info to check if guest
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setUser(data))
+      .catch(() => setUser(null));
+
     (async () => {
       setLoading(true);
       try {
@@ -51,8 +59,19 @@ export default function CommunityFeed() {
     })();
   }, []);
 
+  // Utility to check guest user
+  const checkGuestUser = () => {
+    if (!user) {
+      setShowGuestAlert(true);
+      return true;
+    }
+    return false;
+  };
+
   const toggleLike = async (e, postId) => {
     e.preventDefault();
+    // Check guest before like
+    if (checkGuestUser()) return;
     try {
       await fetch(`/api/community/${postId}/like`, {
         method: 'POST',
@@ -81,6 +100,8 @@ export default function CommunityFeed() {
 
   const openReport = (e, postId) => {
     e.preventDefault();
+    // Check guest before report
+    if (checkGuestUser()) return;
     setReportPostId(postId);
     setShowReportModal(true);
   };
@@ -212,9 +233,10 @@ export default function CommunityFeed() {
           </div>
         </main>
       </div>
-
+      
+      
       {showReportModal && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50  bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg w-96 p-6 relative">
             <button
               onClick={() => setShowReportModal(false)}
@@ -283,6 +305,43 @@ export default function CommunityFeed() {
               <button
                 onClick={() => setShowReportModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Guest Alert Modal */}
+      {showGuestAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50">
+          <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl relative">
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-semibold"
+              onClick={() => setShowGuestAlert(false)}
+            >
+              &times;
+            </button>
+            <h2 className="text-2xl font-semibold text-center mb-4">
+              Login Required
+            </h2>
+            <p className="text-center text-gray-600 mb-6">
+              Please sign in to interact with posts and comments.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                className="w-full bg-sky-400 hover:bg-sky-500 text-white font-semibold py-2 rounded-full"
+                onClick={() => {
+                  setShowGuestAlert(false);
+                  window.location.href = "/login";
+                }}
+              >
+                Login
+              </button>
+              <button
+                className="w-full bg-sky-100 hover:bg-sky-200 text-gray-700 font-semibold py-2 rounded-full"
+                onClick={() => setShowGuestAlert(false)}
               >
                 Cancel
               </button>
