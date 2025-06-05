@@ -9,7 +9,7 @@ import HeadLogo from "@/components/headlogo";
 
 export default function Settings() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined); // undefined = loading, null = guest, object = user
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [formData, setFormData] = useState({
@@ -109,19 +109,18 @@ export default function Settings() {
           <Navbar />
         </div>
 
-        {/**
-         * Main Content:
-         * - ml-72: เว้นพื้นที่ซ้ายเท่าความกว้าง sidebar
-         * - bg-white: พื้นหลังสีขาว
-         * - p-4: padding รอบๆ
-         * - overflow-y-auto: ให้ scroll ในตัว main เมื่อเนื้อหายาวเกิน
-         * - min-h-[calc(100vh-70px)]: ยืดความสูงให้ครอบพื้นที่ตั้งแต่ใต้ header ลงไปจนจบ viewport
-         */}
         <main
           className="ml-72 flex-1 overflow-y-auto bg-white p-4"
           style={{ minHeight: "calc(100vh - 70px)" }}
         >
-          {!user ? (
+          {user === undefined ? (
+            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
+              <div className="h-12 w-40 bg-gray-100 rounded-full animate-pulse mb-8" />
+              <div className="h-8 w-1/2 bg-gray-100 rounded mb-4" />
+              <div className="h-8 w-1/3 bg-gray-100 rounded mb-4" />
+              <div className="h-24 w-full bg-gray-100 rounded mb-4" />
+            </div>
+          ) : !user ? (
             // Guest View: แสดงฟอร์มแบบ readonly
             <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
               <h2 className="text-2xl font-semibold text-sky-600 mb-8">

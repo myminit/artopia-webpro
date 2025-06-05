@@ -14,7 +14,7 @@ export default function UploadPage() {
   const router                      = useRouter();
 
   // ใช้ระบบเดียวกับหน้า Settings
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(undefined); // เพิ่ม <any> หรือ <UserType|undefined|null>
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })
@@ -25,14 +25,10 @@ export default function UploadPage() {
         return res.json();
       })
       .then((data) => {
-        if (data) {
-          setUser(data);
-        } else {
-          setUser(null);
-        }
+        setUser(data); // data อาจเป็น object หรือ null ได้เลย
       })
       .catch(() => {
-        setUser(null);
+        setUser(null as any); // หรือ setUser(null) ถ้าใช้ <any> ด้านบน
       });
   }, []);
 
@@ -98,119 +94,137 @@ export default function UploadPage() {
         <div className="py-2 mx-auto">
           <h1 className="text-4xl font-bold mb-6">Upload post</h1>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Post Textarea */}
-            <textarea
-              className={`w-full p-8 border rounded-md mb-4 ${
-                user 
-                  ? 'border-gray-300 bg-gray-100 text-gray-900' 
-                  : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-              }`}
-              placeholder={user ? "Write your post here" : "Please log in to write a post"}
-              value={caption}
-              onChange={(e) => user && setCaption(e.target.value)}
-              rows={5}
-              disabled={!user}
-            />
-
-            {/* Image Upload */}
-            <div className={`border rounded-md p-12 flex flex-col items-center justify-center text-center mb-6 relative ${
-              user 
-                ? 'border-gray-200 bg-white' 
-                : 'border-gray-200 bg-gray-50'
-            }`}>
-              {preview && user ? (
-                <div className="relative">
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="max-h-64 object-contain mb-4 rounded-md"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      setPreview(null);
-                    }}
-                    className="absolute top-2 right-2 text-gray-600 hover:text-red-500 transition"
-                    aria-label="Remove image"
-                  >
-                    <XMarkIcon className="h-6 w-6" />
-                  </button>
+          {/* อย่า render form หรือ guest message เลยถ้า user === undefined */}
+          {user === undefined ? (
+            <div />
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* User Profile (avatar + name) */}
+              {user ? (
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200">
+                    <img
+                      src={user.avatar || "/img/user.png"}
+                      alt="Profile"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <span className="font-semibold text-gray-800">{user.name}</span>
                 </div>
-              ) : (
-                <>
-                  <PhotoIcon className={`w-18 h-18 mb-2 ${
-                    user ? 'text-gray-400' : 'text-gray-300'
-                  }`} />
-                  <p className={`text-sm mb-2 ${
-                    user ? 'text-gray-500' : 'text-gray-400'
-                  }`}>
-                    {user ? 'Add photos or drag and drop' : 'Please log in to upload photos'}
-                  </p>
-                </>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
+              ) : null}
+              {/* Post Textarea */}
+              <textarea
+                className={`w-full p-8 border rounded-md mb-4 ${
+                  user
+                    ? 'border-gray-300 bg-gray-100 text-gray-900'
+                    : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                }`}
+                placeholder={user ? "Write your post here" : "Please log in to write a post"}
+                value={caption}
+                onChange={(e) => user && setCaption(e.target.value)}
+                rows={5}
                 disabled={!user}
               />
-              <button
-                type="button"
-                style={{ backgroundColor: user ? "#29B3F1" : "#9CA3AF" }}
-                className={`mt-2 px-4 py-2 text-white rounded-full transition inline-flex items-center gap-2 ${
-                  user 
-                    ? 'hover:opacity-90 cursor-pointer' 
-                    : 'cursor-not-allowed opacity-60'
-                }`}
-                onClick={() => user && fileInputRef.current?.click()}
-                disabled={!user}
-              >
-                <ArrowUpTrayIcon className="w-5 h-5" />
-                Browse
-              </button>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-between gap-4">
-              <button
-                className={`w-full border py-2 rounded-md transition ${
-                  user 
-                    ? 'border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer' 
-                    : 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed'
-                }`}
-                type="button"
-                onClick={() => {
-                  if (user) {
-                    setCaption('');
-                    setImageFile(null);
-                    setPreview(null);
-                  }
-                }}
-                disabled={!user}
-              >
-                Cancel
-              </button>
-              <button
-                style={{ backgroundColor: user ? "#29B3F1" : "#9CA3AF" }}
-                className={`w-full text-white py-2 rounded-md transition ${
-                  user 
-                    ? 'hover:opacity-90 cursor-pointer' 
-                    : 'cursor-not-allowed opacity-60'
-                }`}
-                type="submit"
-                disabled={!user}
-              >
-                Post
-              </button>
-            </div>
-          </form>
+              {/* Image Upload */}
+              <div className={`border rounded-md p-12 flex flex-col items-center justify-center text-center mb-6 relative ${
+                user 
+                  ? 'border-gray-200 bg-white' 
+                  : 'border-gray-200 bg-gray-50'
+              }`}>
+                {preview && user ? (
+                  <div className="relative">
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="max-h-64 object-contain mb-4 rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageFile(null);
+                        setPreview(null);
+                      }}
+                      className="absolute top-2 right-2 text-gray-600 hover:text-red-500 transition"
+                      aria-label="Remove image"
+                    >
+                      <XMarkIcon className="h-6 w-6" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <PhotoIcon className={`w-18 h-18 mb-2 ${
+                      user ? 'text-gray-400' : 'text-gray-300'
+                    }`} />
+                    <p className={`text-sm mb-2 ${
+                      user ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {user ? 'Add photos or drag and drop' : 'Please log in to upload photos'}
+                    </p>
+                  </>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  disabled={!user}
+                />
+                <button
+                  type="button"
+                  style={{ backgroundColor: user ? "#29B3F1" : "#9CA3AF" }}
+                  className={`mt-2 px-4 py-2 text-white rounded-full transition inline-flex items-center gap-2 ${
+                    user 
+                      ? 'hover:opacity-90 cursor-pointer' 
+                      : 'cursor-not-allowed opacity-60'
+                  }`}
+                  onClick={() => user && fileInputRef.current?.click()}
+                  disabled={!user}
+                >
+                  <ArrowUpTrayIcon className="w-5 h-5" />
+                  Browse
+                </button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-between gap-4">
+                <button
+                  className={`w-full border py-2 rounded-md transition ${
+                    user 
+                      ? 'border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer' 
+                      : 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed'
+                  }`}
+                  type="button"
+                  onClick={() => {
+                    if (user) {
+                      setCaption('');
+                      setImageFile(null);
+                      setPreview(null);
+                    }
+                  }}
+                  disabled={!user}
+                >
+                  Cancel
+                </button>
+                <button
+                  style={{ backgroundColor: user ? "#29B3F1" : "#9CA3AF" }}
+                  className={`w-full text-white py-2 rounded-md transition ${
+                    user 
+                      ? 'hover:opacity-90 cursor-pointer' 
+                      : 'cursor-not-allowed opacity-60'
+                  }`}
+                  type="submit"
+                  disabled={!user}
+                >
+                  Post
+                </button>
+              </div>
+            </form>
+          )}
 
           {/* Guest Message */}
-          {!user && (
+          {user === null && (
             <div className="text-center pt-4">
               <p className="text-gray-500">
                 You must{" "}
