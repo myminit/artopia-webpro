@@ -19,7 +19,7 @@ import { useCustomAutoSave } from './useCustomAutoSave';
 export default function DrawPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const loadId = searchParams.get('loadId'); // ถ้ามาจากหน้า Gallery
+  const loadId = searchParams.get('loadId');
 
   const canvasRef = useRef<CustomCanvasRef | null>(null);
 
@@ -27,18 +27,18 @@ export default function DrawPage() {
   const [brushSize, setBrushSize] = useState(DEFAULT_BRUSH_SIZE);
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR);
   const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY_COLOR);
-  const [activeColor, setActiveColor] = useState<'primary'|'secondary'>('primary');
+  const [activeColor, setActiveColor] = useState<'primary' | 'secondary'>('primary');
   const [drawingName, setDrawingName] = useState<string>('untitled');
   const [saving, setSaving] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
+  // เรียก hook autosave
   useCustomAutoSave(canvasRef);
 
   // ─── A: โหลดภาพเก่า (ถ้ามี loadId) ───────────────────────────────────────
   useEffect(() => {
     if (!loadId) return;
 
-    // 1) เช็กล็อกอิน
     fetch('/api/auth/me', { credentials: 'include' })
       .then((r) => {
         if (r.ok) {
@@ -53,10 +53,11 @@ export default function DrawPage() {
         if (!res || !res.ok) return;
         const data = (await res.json()) as { imageUrl: string; name: string };
         if (data.imageUrl) {
-          // 2) loadImage (CustomCanvas) → ต้องโหลด crossOrigin แล้ว draw
+          // โหลดรูปจาก URL ลงใน CustomCanvas
           canvasRef.current?.loadImage(data.imageUrl);
-          // 3) ตั้งชื่อ drawing
           setDrawingName(data.name || 'untitled');
+          // เมื่อโหลดจาก server มาแล้ว ให้ล้าง autosave เก่าทิ้ง
+          localStorage.removeItem('autosave-canvas-image');
         }
       })
       .catch((err) => {
@@ -73,6 +74,16 @@ export default function DrawPage() {
       })
       .catch(() => setIsLoggedIn(false));
   }, []);
+
+  // ─── B1: ถ้าไม่มี loadId ให้โหลด autosaved image จาก localStorage ─────────
+  useEffect(() => {
+    if (loadId) return; // ถ้ามี loadId ให้ skip
+    const savedDataUrl = localStorage.getItem('autosave-canvas-image');
+    if (savedDataUrl) {
+      // โหลดรูปจาก Autosave ลงใน CustomCanvas
+      canvasRef.current?.loadImage(savedDataUrl);
+    }
+  }, [loadId]);
 
   // ─── C: saveToGallery (ส่งรูปขึ้น S3 + บันทึก metadata) ──────────────────
   const saveToGallery = async () => {
@@ -124,7 +135,7 @@ export default function DrawPage() {
       } = presignData;
 
       // 4) แปลง DataURL → Blob แล้วอัปโหลด (PUT)
-      const blobFull  = await (await fetch(fullDataUrl)).blob();
+      const blobFull = await (await fetch(fullDataUrl)).blob();
       const blobThumb = await (await fetch(thumbDataUrl)).blob();
       const up1 = await fetch(full.presign, {
         method: 'PUT',
