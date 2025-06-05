@@ -1,4 +1,4 @@
-// /app/page.tsx
+// File: /app/page.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -13,11 +13,11 @@ import {
 } from '@heroicons/react/24/solid';
 
 import Navbar from "@/components/navbar";
-import HeadLogo from "@/components/headLogo";
+import HeadLogo from "@/components/headlogo";
 
 interface DrawingItem {
   _id: string;
-  name: string;         // ตรงกับ field “name” ใน MongoDB
+  name: string;
   imageUrl: string;
   thumbnailUrl: string;
   updatedAt: string;
@@ -25,54 +25,37 @@ interface DrawingItem {
 
 export default function GalleryPage() {
   const router = useRouter();
-
-  // สถานะล็อกอิน (null = กำลังเช็ก, false = ไม่ล็อกอิน, true = ล็อกอินแล้ว)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-
-  // รายการ Drawing ของ user
   const [items, setItems] = useState<DrawingItem[]>([]);
-
-  // popupId = _id ของรูปที่เปิดเมนู (ellipsis) อยู่
   const [popupId, setPopupId] = useState<string | null>(null);
-
-  // editingId = _id ของรูปที่กำลังแก้ชื่ออยู่
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  // newTitle = ข้อความที่จะใช้แก้ชื่อ (+ initialize = '')
   const [newTitle, setNewTitle] = useState<string>('');
 
-  // ─── 1. เช็กล็อกอิน ─────────────────────────────────────────
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'include' })
       .then((res) => setIsLoggedIn(res.ok))
       .catch(() => setIsLoggedIn(false));
   }, []);
 
-  // ─── 2. ถ้าล็อกอินแล้ว ให้ fetch list ของ gallery ──────────
   useEffect(() => {
     if (isLoggedIn) {
       fetch('/api/gallery/list', { credentials: 'include' })
         .then((res) => (res.ok ? res.json() : []))
-        .then((data: DrawingItem[]) => {
-          setItems(data);
-        })
+        .then((data: DrawingItem[]) => setItems(data))
         .catch(console.error);
     }
   }, [isLoggedIn]);
 
-  // ─── ฟังก์ชันเปิด/ปิด popup เมนู … (ellipsis) ───────────────
   const togglePopup = (id: string) => {
     setPopupId((prev) => (prev === id ? null : id));
     setEditingId(null);
   };
 
-  // ─── เริ่มโหมดแก้ชื่อ (กดไอคอนดินสอ) ─────────────────────────
   const startEditing = (id: string, currentName: string) => {
     setEditingId(id);
     setNewTitle(currentName);
   };
 
-  // ─── บันทึกชื่อใหม่ (เมื่อ input หลุดโฟกัส) ───────────────────
   const saveTitle = async (id: string) => {
     if (!newTitle.trim()) {
       setEditingId(null);
@@ -100,7 +83,6 @@ export default function GalleryPage() {
     }
   };
 
-  // ─── ดาวน์โหลดไฟล์เต็ม ───────────────────────────────────────────
   const downloadFull = (url: string, name: string) => {
     const a = document.createElement('a');
     a.href = url;
@@ -108,7 +90,6 @@ export default function GalleryPage() {
     a.click();
   };
 
-  // ─── ลบรูป ───────────────────────────────────────────────────────
   const deleteItem = async (id: string) => {
     if (!confirm('คุณแน่ใจว่าจะลบรูปนี้?')) return;
     try {
@@ -128,19 +109,26 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-        {/* HeadLogo */}
-        <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
-            <HeadLogo />
-        </div>
+      {/* 1) Header (fixed สูง 70px) */}
+      <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
+        <HeadLogo />
+      </div>
 
-        <div className="flex pt-[70px]">
-        {/* Navbar */}
+      {/* 2) Container หลัก: ทำให้มีความสูง = calc(100vh - 70px) */}
+      <div
+        className="flex pt-[70px]"
+        style={{ height: "calc(100vh - 70px)" }}  
+      >
+        {/* 3) Sidebar (fixed สูง = 100vh - 70px, กว้าง = 18rem) */}
         <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
           <Navbar />
         </div>
 
-        {/* Main */}
-        <main className="ml-72 flex-1 overflow-y-auto p-6">
+        {/* 4) Main Content: เว้นซ้าย 18rem, ทำให้ scroll เฉพาะตรงนี้ */}
+        <main
+          className="ml-72 flex-1 overflow-y-auto p-6"
+          style={{ minHeight: "calc(100vh - 70px)" }}
+        >
           {/* Banner */}
           <div className="w-full mb-8">
             <Image
@@ -153,7 +141,7 @@ export default function GalleryPage() {
             />
           </div>
 
-          {/* ─── Section: My Gallery ─────────────────────────────────── */}
+          {/* Section: My Gallery */}
           <h2 className="text-3xl font-bold mb-6">My Gallery</h2>
 
           {isLoggedIn === null && (
@@ -231,7 +219,7 @@ export default function GalleryPage() {
                     </div>
                   )}
 
-                  {/* Thumbnail ของรูป */}
+                  {/* Thumbnail */}
                   <div className="w-full h-36 bg-gray-100 rounded-md overflow-hidden">
                     <Link href={`/draw?loadId=${d._id}`}>
                       {d.thumbnailUrl ? (
@@ -250,7 +238,7 @@ export default function GalleryPage() {
                     </Link>
                   </div>
 
-                  {/* ชื่อรูป + วันที่อัปเดตใต้ Thumbnail */}
+                  {/* ชื่อและวันที่อัปเดต */}
                   <div className="mt-2 text-center">
                     <p className="truncate font-semibold">{d.name}</p>
                     <p className="text-xs text-gray-500">

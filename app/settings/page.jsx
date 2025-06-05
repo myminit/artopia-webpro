@@ -5,7 +5,7 @@ import Image from "next/image";
 import { CameraIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
-import HeadLogo from "@/components/headLogo";
+import HeadLogo from "@/components/headlogo";
 
 export default function Settings() {
   const router = useRouter();
@@ -20,12 +20,7 @@ export default function Settings() {
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })
-      .then((res) => {
-        if (!res.ok) {
-          return null;
-        }
-        return res.json();
-      })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
           setUser(data);
@@ -38,9 +33,7 @@ export default function Settings() {
           setUser(null);
         }
       })
-      .catch(() => {
-        setUser(null);
-      });
+      .catch(() => setUser(null));
   }, []);
 
   const handleInputChange = (e) => {
@@ -51,25 +44,13 @@ export default function Settings() {
     }));
   };
 
-  const handleReset = () => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        bio: user.bio || "",
-      });
-    }
-  };
-
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (!file.type.startsWith("image/")) {
       setMessage({ type: "error", text: "Please upload an image file" });
       return;
     }
-
     const formDataFile = new FormData();
     formDataFile.append("avatar", file);
 
@@ -80,19 +61,9 @@ export default function Settings() {
         body: formDataFile,
         credentials: "include",
       });
-
       if (!res.ok) throw new Error("Failed to upload image");
-
       const data = await res.json();
-      console.log("API Response:", data);
-
-      // Update local state with the new avatar URL
-      setUser((prev) => {
-        console.log("Previous user state:", prev);
-        const newState = { ...prev, avatar: data.avatarUrl };
-        console.log("New user state:", newState);
-        return newState;
-      });
+      setUser((prev) => ({ ...prev, avatar: data.avatarUrl }));
       setMessage({ type: "success", text: "Avatar updated successfully" });
     } catch (error) {
       console.error("Error:", error);
@@ -104,27 +75,20 @@ export default function Settings() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
-      const updateData = {
-        name: formData.name,
-        bio: formData.bio,
-      };
-
+      const updateData = { name: formData.name, bio: formData.bio };
       const res = await fetch("/api/user/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updateData),
         credentials: "include",
       });
-
       if (!res.ok) throw new Error("Failed to update profile");
-
       const updatedUser = await res.json();
       setUser(updatedUser);
       setMessage({ type: "success", text: "Profile updated successfully" });
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "Failed to update profile" });
     } finally {
       setLoading(false);
@@ -133,22 +97,33 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen">
-      {/* HeadLogo ด้านบน */}
+      {/* Header (fixed สูง 70px) */}
       <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
         <HeadLogo />
       </div>
 
-      <div className="flex pt-[70px] h-screen">
-        {/* Navbar ด้านซ้าย */}
+      {/* Wrapper ด้านล่าง Header */}
+      <div className="flex pt-[70px]">
+        {/* Sidebar (fixed) */}
         <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
           <Navbar />
         </div>
 
-        {/* Main Content - ใช้ flex center */}
-        <main className="ml-72 flex-1 flex items-center justify-center bg-white p-4">
+        {/**
+         * Main Content:
+         * - ml-72: เว้นพื้นที่ซ้ายเท่าความกว้าง sidebar
+         * - bg-white: พื้นหลังสีขาว
+         * - p-4: padding รอบๆ
+         * - overflow-y-auto: ให้ scroll ในตัว main เมื่อเนื้อหายาวเกิน
+         * - min-h-[calc(100vh-70px)]: ยืดความสูงให้ครอบพื้นที่ตั้งแต่ใต้ header ลงไปจนจบ viewport
+         */}
+        <main
+          className="ml-72 flex-1 overflow-y-auto bg-white p-4"
+          style={{ minHeight: "calc(100vh - 70px)" }}
+        >
           {!user ? (
-            // Guest view - disabled state
-            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl">
+            // Guest View: แสดงฟอร์มแบบ readonly
+            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
               <h2 className="text-2xl font-semibold text-sky-600 mb-8">
                 Account Setting
               </h2>
@@ -170,7 +145,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Form Fields */}
+              {/* Form Fields (readonly) */}
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -185,7 +160,6 @@ export default function Settings() {
                       placeholder="Please log in to view username"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email
@@ -199,7 +173,6 @@ export default function Settings() {
                     />
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bio
@@ -210,7 +183,6 @@ export default function Settings() {
                     placeholder="Please log in to view or edit your bio"
                   />
                 </div>
-
                 <div className="text-center pt-4">
                   <p className="text-gray-500">
                     You must{" "}
@@ -226,8 +198,8 @@ export default function Settings() {
               </div>
             </div>
           ) : (
-            // Logged in user view - functional state
-            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl">
+            // Logged-in View: แสดงฟอร์มแก้ไขได้
+            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
               <h2 className="text-2xl font-semibold text-sky-600 mb-8">
                 Account Setting
               </h2>
@@ -254,8 +226,6 @@ export default function Settings() {
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                   )}
-
-                  {/* Overlay เมื่อ hover */}
                   <label className="absolute inset-0 rounded-full cursor-pointer group">
                     <div className="w-full h-full bg-black bg-opacity-50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <CameraIcon className="w-8 h-8 text-white mb-2" />
@@ -302,7 +272,6 @@ export default function Settings() {
                       required
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email
@@ -315,7 +284,6 @@ export default function Settings() {
                     />
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bio
@@ -328,15 +296,12 @@ export default function Settings() {
                     placeholder="Write your bio here..."
                   />
                 </div>
-
                 <div className="flex justify-center gap-4 pt-4">
                   <button
                     type="submit"
                     disabled={loading}
                     className={`bg-sky-500 text-white px-8 py-3 rounded-lg hover:bg-sky-600 transition-colors font-medium shadow-md ${
-                      loading
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:shadow-lg"
+                      loading ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg"
                     }`}
                   >
                     {loading ? "Updating..." : "Update Profile"}

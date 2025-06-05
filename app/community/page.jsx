@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from "@/components/navbar";
-import HeadLogo from "@/components/headLogo";
+import HeadLogo from "@/components/headlogo";
 import {
   HeartIcon as HeartIconSolid,
   HeartIcon as HeartIconOutline,
@@ -135,8 +135,8 @@ export default function CommunityFeed() {
     return (
       <div className="min-h-screen">
         <HeadLogo />
-        <div className="flex pt-[60px]">
-          <aside className="fixed top-[60px] left-0 h-[calc(100vh-60px)] w-60 bg-[#00AEEF] z-40 shadow-lg">
+        <div className="flex pt-[70px]">
+          <aside className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
             <Navbar />
           </aside>
           <main className="ml-60 flex-1 flex items-center justify-center">

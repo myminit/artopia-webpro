@@ -1,10 +1,8 @@
-"use client";
-
-import { useState, useEffect } from "react";
+// components/headLogo.jsx
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -12,21 +10,16 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function HeadLogo() {
+  // ลบ type annotation ออก ให้เหลือแค่ useState(null)
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/auth/me", {
-      credentials: "include",
-    })
+    fetch("/api/auth/me", { credentials: "include" })
       .then((res) => {
-        if (res.status === 401) {
-          // guest mode: ไม่ต้อง log error, ไม่ต้อง setUser(null) ซ้ำ
-          return null;
-        }
+        if (res.status === 401) return null;
         if (!res.ok) {
-          // error อื่นๆ (เช่น 500) ให้ log error
           console.error("Failed to fetch user:", res.status);
           return null;
         }
@@ -38,11 +31,7 @@ export default function HeadLogo() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth/logout", { 
-        method: "POST", 
-        credentials: "include" 
-      });
-      
+      const res = await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
       if (res.ok) {
         setUser(null);
         setShowDropdown(false);
@@ -83,8 +72,9 @@ export default function HeadLogo() {
         >
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 rounded-full overflow-hidden">
+              {/* ใช้ไฟล์ PNG/Fallback จาก /public/img/user.png */}
               <Image
-                src={user?.avatar || "https://api.dicebear.com/7.x/bottts/svg?seed=1"}
+                src={user?.avatar || "/img/user.png"}
                 alt="User Profile"
                 fill
                 sizes="32px"
@@ -92,7 +82,7 @@ export default function HeadLogo() {
                 priority
               />
             </div>
-            <span className="text-black">{user?.name || 'Guest'}</span>
+            <span className="text-black">{user?.name || "Guest"}</span>
           </div>
         </button>
 
@@ -104,7 +94,7 @@ export default function HeadLogo() {
                 <div className="flex items-center gap-x-4 mb-4">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden border border-sky-200">
                     <Image
-                      src={user?.avatar || "https://api.dicebear.com/7.x/bottts/svg?seed=1"}
+                      src={user.avatar || "/img/user.png"}
                       alt="Profile"
                       fill
                       sizes="48px"
@@ -143,7 +133,7 @@ export default function HeadLogo() {
               </>
             ) : (
               <>
-                {/* Guest / Not logged-in */}
+                {/* Guest Mode */}
                 <div className="flex flex-col items-center text-center space-y-4 p-4">
                   <div className="relative w-14 h-14 rounded-full overflow-hidden border border-gray-300 shadow-sm">
                     <Image

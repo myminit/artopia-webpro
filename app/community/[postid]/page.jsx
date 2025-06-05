@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Navbar from "@/components/navbar";
-import HeadLogo from "@/components/headLogo";
+import HeadLogo from "@/components/headlogo";
 import Image from "next/image";
 import {
   HeartIcon as HeartIconSolid,
