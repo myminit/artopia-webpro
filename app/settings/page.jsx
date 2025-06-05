@@ -105,222 +105,227 @@ export default function Settings() {
       {/* Wrapper ด้านล่าง Header */}
       <div className="flex pt-[70px]">
         {/* Sidebar (fixed) */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-50 bg-sky-400 z-40 shadow">
           <Navbar />
         </div>
 
         <main
-          className="ml-72 flex-1 overflow-y-auto bg-white p-4"
+          className="ml-72 flex-1 overflow-y-auto bg-white p-3 flex items-center justify-center"
           style={{ minHeight: "calc(100vh - 70px)" }}
         >
           {user === undefined ? (
-            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
-              <div className="h-12 w-40 bg-gray-100 rounded-full animate-pulse mb-8" />
-              <div className="h-8 w-1/2 bg-gray-100 rounded mb-4" />
-              <div className="h-8 w-1/3 bg-gray-100 rounded mb-4" />
-              <div className="h-24 w-full bg-gray-100 rounded mb-4" />
-            </div>
+            // ไม่แสดงอะไรระหว่างโหลด
+            <></>
           ) : !user ? (
             // Guest View: แสดงฟอร์มแบบ readonly
-            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
-              <h2 className="text-2xl font-semibold text-sky-600 mb-8">
+            <div className="w-full max-w-7xl bg-white p-12 shadow-xl rounded-xl">
+              <h2 className="text-3xl font-semibold text-sky-600 mb-10">
                 Account Setting
               </h2>
 
-              {/* Profile Picture Section */}
-              <div className="flex flex-col items-center mb-10">
-                <label className="block text-sm text-gray-600 mb-4">
-                  Your Profile Picture
-                </label>
-                <div className="relative w-32 h-32">
-                  <img
-                    src="/default-profile.jpg"
-                    alt="Guest"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-gray-300 opacity-60"
-                  />
-                  <div className="absolute inset-0 rounded-full bg-gray-200 bg-opacity-50 flex items-center justify-center text-sm text-gray-600 font-medium">
-                    Not Logged In
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Fields (readonly) */}
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      value=""
-                      readOnly
-                      className="w-full p-3 rounded-lg bg-gray-100 text-gray-400 border border-gray-200"
-                      placeholder="Please log in to view username"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value=""
-                      readOnly
-                      className="w-full p-3 rounded-lg bg-gray-100 text-gray-400 border border-gray-200"
-                      placeholder="Please log in to view email"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bio
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                {/* Profile Picture Section */}
+                <div className="lg:col-span-1 flex flex-col items-center">
+                  <label className="block text-sm text-gray-600 mb-4">
+                    Your Profile Picture
                   </label>
-                  <textarea
-                    readOnly
-                    className="w-full p-3 rounded-lg bg-gray-100 text-gray-400 min-h-[100px] border border-gray-200 resize-none"
-                    placeholder="Please log in to view or edit your bio"
-                  />
+                  <div className="relative w-48 h-48">
+                    <img
+                      src="/default-profile.jpg"
+                      alt="Guest"
+                      className="w-48 h-48 rounded-full object-cover border-4 border-gray-300 opacity-60"
+                    />
+                    <div className="absolute inset-0 rounded-full bg-gray-200 bg-opacity-50 flex items-center justify-center text-sm text-gray-600 font-medium">
+                      Not Logged In
+                    </div>
+                  </div>
                 </div>
-                <div className="text-center pt-4">
-                  <p className="text-gray-500">
-                    You must{" "}
-                    <a
-                      href="/login"
-                      className="text-sky-500 underline hover:text-sky-600 font-medium"
-                    >
-                      log in
-                    </a>{" "}
-                    to view and edit your account settings.
-                  </p>
+
+                {/* Form Fields (readonly) */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value=""
+                        readOnly
+                        className="w-full p-5 rounded-lg bg-gray-100 text-gray-400 border border-gray-200"
+                        placeholder="Please log in to view username"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value=""
+                        readOnly
+                        className="w-full p-5 rounded-lg bg-gray-100 text-gray-400 border border-gray-200"
+                        placeholder="Please log in to view email"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bio
+                    </label>
+                    <textarea
+                      readOnly
+                      className="w-full p-5 rounded-lg bg-gray-100 text-gray-400 min-h-[140px] border border-gray-200 resize-none"
+                      placeholder="Please log in to view or edit your bio"
+                    />
+                  </div>
+                  <div className="text-center pt-6">
+                    <p className="text-gray-500 text-lg">
+                      You must{" "}
+                      <a
+                        href="/login"
+                        className="text-sky-500 underline hover:text-sky-600 font-medium"
+                      >
+                        log in
+                      </a>{" "}
+                      to view and edit your account settings.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
             // Logged-in View: แสดงฟอร์มแก้ไขได้
-            <div className="w-full max-w-3xl bg-white p-12 shadow-xl rounded-xl mx-auto">
-              <h2 className="text-2xl font-semibold text-sky-600 mb-8">
+            <div className="w-full max-w-7xl bg-white p-12 shadow-xl rounded-xl">
+              <h2 className="text-3xl font-semibold text-sky-600 mb-10">
                 Account Setting
               </h2>
 
-              {/* Profile Picture Section */}
-              <div className="flex flex-col items-center mb-10">
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  Your Profile Picture
-                </label>
-                <div className="relative w-32 h-32">
-                  {user.avatar ? (
-                    <Image
-                      src={user.avatar}
-                      alt="Profile"
-                      width={128}
-                      height={128}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-300"
-                    />
-                  ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                {/* Profile Picture Section */}
+                <div className="lg:col-span-1 flex flex-col items-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Your Profile Picture
+                  </label>
+                  <div className="relative w-48 h-48">
+                    {user.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt="Profile"
+                        width={192}
+                        height={192}
+                        className="w-48 h-48 rounded-full object-cover border-4 border-gray-300"
+                      />
+                    ) : (
+                      <div
+                        className="w-48 h-48 rounded-full bg-sky-500 flex items-center justify-center text-white text-6xl font-bold border-4 border-gray-300"
+                        title={user.name}
+                      >
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <label className="absolute inset-0 rounded-full cursor-pointer group">
+                      <div className="w-full h-full bg-black bg-opacity-50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <CameraIcon className="w-12 h-12 text-white mb-2" />
+                        <span className="text-base text-white font-medium">
+                          Change Photo
+                        </span>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Form Section */}
+                <div className="lg:col-span-2">
+                  {/* Message Display */}
+                  {message.text && (
                     <div
-                      className="w-32 h-32 rounded-full bg-sky-500 flex items-center justify-center text-white text-4xl font-bold border-4 border-gray-300"
-                      title={user.name}
+                      className={`p-4 mb-6 rounded-lg border ${
+                        message.type === "error"
+                          ? "bg-red-50 text-red-700 border-red-200"
+                          : "bg-green-50 text-green-700 border-green-200"
+                      }`}
                     >
-                      {user.name.charAt(0).toUpperCase()}
+                      {message.text}
                     </div>
                   )}
-                  <label className="absolute inset-0 rounded-full cursor-pointer group">
-                    <div className="w-full h-full bg-black bg-opacity-50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <CameraIcon className="w-8 h-8 text-white mb-2" />
-                      <span className="text-sm text-white font-medium">
-                        Change Photo
-                      </span>
+
+                  {/* Form */}
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Username
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          className="w-full p-5 rounded-lg bg-gray-50 text-gray-700 border border-gray-200 focus:border-sky-400 focus:bg-white focus:outline-none transition-colors"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          className="w-full p-5 rounded-lg bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                          disabled
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      className="hidden"
-                    />
-                  </label>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Bio
+                      </label>
+                      <textarea
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleInputChange}
+                        className="w-full p-5 rounded-lg bg-gray-50 text-gray-700 border border-gray-200 focus:border-sky-400 focus:bg-white focus:outline-none transition-colors min-h-[140px] resize-none"
+                        placeholder="Write your bio here..."
+                      />
+                    </div>
+                    <div className="flex justify-center gap-4 pt-6">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className={`bg-sky-500 text-white px-12 py-5 rounded-lg hover:bg-sky-600 transition-colors font-medium shadow-md text-lg ${
+                          loading
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:shadow-lg"
+                        }`}
+                      >
+                        {loading ? "Updating..." : "Update Profile"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({
+                            name: user.name || "",
+                            email: user.email || "",
+                            bio: user.bio || "",
+                          });
+                          setMessage({ type: "", text: "" });
+                        }}
+                        className="text-gray-600 hover:text-gray-800 px-12 py-5 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors font-medium text-lg"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
-
-              {/* Message Display */}
-              {message.text && (
-                <div
-                  className={`p-4 mb-6 rounded-lg border ${
-                    message.type === "error"
-                      ? "bg-red-50 text-red-700 border-red-200"
-                      : "bg-green-50 text-green-700 border-green-200"
-                  }`}
-                >
-                  {message.text}
-                </div>
-              )}
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full p-3 rounded-lg bg-gray-50 text-gray-700 border border-gray-200 focus:border-sky-400 focus:bg-white focus:outline-none transition-colors"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      className="w-full p-3 rounded-lg bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
-                      disabled
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleInputChange}
-                    className="w-full p-3 rounded-lg bg-gray-50 text-gray-700 border border-gray-200 focus:border-sky-400 focus:bg-white focus:outline-none transition-colors min-h-[100px] resize-none"
-                    placeholder="Write your bio here..."
-                  />
-                </div>
-                <div className="flex justify-center gap-4 pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={`bg-sky-500 text-white px-8 py-3 rounded-lg hover:bg-sky-600 transition-colors font-medium shadow-md ${
-                      loading ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg"
-                    }`}
-                  >
-                    {loading ? "Updating..." : "Update Profile"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData({
-                        name: user.name || "",
-                        email: user.email || "",
-                        bio: user.bio || "",
-                      });
-                      setMessage({ type: "", text: "" });
-                    }}
-                    className="text-gray-600 hover:text-gray-800 px-8 py-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors font-medium"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </form>
             </div>
           )}
         </main>

@@ -116,17 +116,17 @@ export default function GalleryPage() {
 
       {/* 2) Container หลัก: ทำให้มีความสูง = calc(100vh - 70px) */}
       <div
-        className="flex pt-[70px]"
+        className="flex pt-[70px] justify-start"
         style={{ height: "calc(100vh - 70px)" }}  
       >
-        {/* 3) Sidebar (fixed สูง = 100vh - 70px, กว้าง = 18rem) */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        {/* 3) Sidebar (fixed สูง = 100vh - 70px, กว้าง = 12rem) */}
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-48 bg-sky-400 z-40 shadow">
           <Navbar />
         </div>
 
-        {/* 4) Main Content: เว้นซ้าย 18rem, ทำให้ scroll เฉพาะตรงนี้ */}
+        {/* 4) Main Content: เว้นซ้าย 12rem, ทำให้ scroll เฉพาะตรงนี้ */}
         <main
-          className="ml-72 flex-1 overflow-y-auto p-6"
+          className="ml-48 flex-1 overflow-y-auto p-6"
           style={{ minHeight: "calc(100vh - 70px)" }}
         >
           {/* Banner */}

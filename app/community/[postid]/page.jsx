@@ -96,16 +96,17 @@ export default function PostDetailPage() {
   };
 
   if (!post) {
+    // ไม่ต้องขึ้นกำลังโหลด ให้แสดง Navbar และ HeadLogo ตามปกติ
     return (
       <div className="min-h-screen">
-        <HeadLogo />
-        <div className="flex pt-[60px]">
-          <aside className="fixed top-[60px] left-0 h-[calc(100vh-60px)] w-60 bg-[#00AEEF] z-40 shadow-lg">
+        <div className="fixed top-0 left-0 w-full h-[70px] bg-white shadow z-50">
+          <HeadLogo />
+        </div>
+        <div className="flex pt-[70px] h-screen">
+          <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-50 bg-sky-400 z-40 shadow">
             <Navbar />
-          </aside>
-          <main className="ml-60 flex-1 flex items-center justify-center">
-            <p className="text-gray-500">Loading...</p>
-          </main>
+          </div>
+          <main className="ml-50 flex-1 overflow-y-auto px-6 py-4 pt-6" />
         </div>
       </div>
     );
@@ -207,7 +208,7 @@ export default function PostDetailPage() {
         // ถ้าดึงข้อมูลล่าสุดไม่ได้ ค่อยใช้ข้อมูลจาก response แรก
         setComments((arr) => [...arr, { ...c, likes: [], replies: [] }]);
       }
-      
+
       setNewComment("");
     } catch (err) {
       console.error("Submit comment failed:", err);
@@ -318,202 +319,232 @@ export default function PostDetailPage() {
 
       <div className="flex pt-[70px] h-screen">
         {/* Navbar */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-50 bg-sky-400 z-40 shadow">
           <Navbar />
         </div>
 
         {/* Main Content */}
-        <main className="ml-72 flex-1 overflow-y-auto px-6 py-4 pt-6">
-          <div className="cursor-pointer">
-            <button
-              onClick={() => router.back()}
-              className="text-black hover:opacity-70"
-            >
-              <ArrowLeftIcon className="w-6 h-6" />
-            </button>
-          </div>
-
-          <div className="flex justify-center px-6 pb-3 bg-white">
-            <div className="flex flex-col lg:flex-row gap-6 w-full max-w-screen-xl">
-              {/* Left: Post */}
-              <div className="w-full lg:w-2/3 bg-white rounded-2xl shadow-md p-6 ">
-                <img
-                  src={post.imageUrl}
-                  alt={post.caption}
-                  className="rounded w-full max-w-[600px] mx-auto"
-                />
-                <div className="mt-4 flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                      <Image
-                        src={post.userAvatar || "https://api.dicebear.com/7.x/bottts/svg?seed=1"}
-                        alt={post.userName}
-                        fill
-                        sizes="32px"
-                        className="object-cover"
-                        priority
-                      />
-                    </div>
-                    <span className="font-semibold">{post.userName}</span>
-                  </div>
-
-                  <button
-                    onClick={() => openReport(post._id)}
-                    className="px-1 py-1 text-sm rounded hover:bg-gray-100 flex items-center gap-1 border"
-                  >
-                    <FlagIconOutline className="w-6 h-6 text-black" />
-                    Report
-                  </button>
-                </div>
-
-                <p className="mt-2 text-gray-800">{post.caption}</p>
-                <div className="mt-4 flex flex-wrap gap-4 text-gray-500 text-sm items-center">
-                  <button
-                    onClick={toggleLikePost}
-                    className="flex items-center gap-1 hover:opacity-70"
-                  >
-                    {hearted ? (
-                      <HeartIconSolid className="w-6 h-6 text-black fill-current" />
-                    ) : (
-                      <HeartIconOutline className="w-6 h-6 text-black" />
-                    )}
-                    <span>{post.likes.length} Likes</span>
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <CommentIconOutline className="w-6 h-6 text-black" />
-                    <span>{comments.length} Comments</span>
-                  </div>
-                </div>
+        <main className="ml-50 flex flex-1 min-h-[calc(100vh-70px)] items-center justify-center overflow-y-auto px-6 py-4 pt-6">
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-screen-xl">
+              <div className="cursor-pointer mb-4">
+                <button
+                  onClick={() => router.back()}
+                  className="text-black hover:opacity-70"
+                >
+                  <ArrowLeftIcon className="w-6 h-6" />
+                </button>
               </div>
 
-              {/* Right: Comments */}
-              <div className="w-full lg:w-[480px] bg-sky-300 rounded-2xl p-4 flex flex-col h-[600px]">
-                <h3 className="text-xl font-semibold mb-4">Comments</h3>
+              <div className="flex justify-center px-6 pb-3 bg-white">
+                <div className="flex flex-col lg:flex-row gap-6 w-full max-w-screen-xl">
+                  {/* Left: Post - ขนาดคงที่ */}
+                  <div className="w-full lg:w-2/3 bg-white rounded-2xl shadow-md p-6 h-[600px] flex flex-col">
+                    {/* Container สำหรับรูปภาพ - จำกัดขนาด */}
+                    <div className="flex-1 flex items-center justify-center overflow-hidden rounded-lg mb-4 bg-gray-50">
+                      <img
+                        src={post.imageUrl}
+                        alt={post.caption}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    </div>
 
-                {/* Scrollable Comment List */}
-                <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-                  {comments.map((c) => (
-                    <div key={c._id} className="mb-2">
-                      <div className="flex items-center justify-between mb-1">
+                    {/* ข้อมูลโพสต์ - ส่วนล่าง */}
+                    <div className="flex-shrink-0">
+                      <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center gap-2">
-                          <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                          <div className="relative w-8 h-8 rounded-full overflow-hidden">
                             <Image
-                              src={c.userAvatar || "https://api.dicebear.com/7.x/bottts/svg?seed=2"}
-                              alt={c.userName}
+                              src={
+                                post.userAvatar ||
+                                "https://api.dicebear.com/7.x/bottts/svg?seed=1"
+                              }
+                              alt={post.userName}
                               fill
-                              sizes="24px"
+                              sizes="32px"
                               className="object-cover"
                               priority
                             />
                           </div>
-                          <span className="font-semibold text-sm">{c.userName}</span>
+                          <span className="font-semibold">{post.userName}</span>
                         </div>
 
-                        {/* ... vertical icon */}
-                        <div className="relative">
-                          <button
-                            onClick={() => openReport(c._id)}
-                            className="text-black hover:opacity-80"
-                          >
-                            <FlagIconOutline className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <p className="text-sm">{c.text}</p>
-
-                      <div className="flex gap-4 mt-1 text-xs text-gray-700">
                         <button
-                          onClick={() => toggleLikeComment(c._id)}
-                          className="flex items-center gap-1 hover:opacity-70"
+                          onClick={() => openReport(post._id)}
+                          className="px-1 py-1 text-sm rounded hover:bg-gray-100 flex items-center gap-1 border"
                         >
-                          {(c.likes || []).includes("") ? (
-                            <HeartIconSolid className="w-5 h-5 text-black fill-current" />
-                          ) : (
-                            <HeartIconOutline className="w-5 h-5 text-black" />
-                          )}
-                          <span>{(c.likes || []).length}</span>
+                          <FlagIconOutline className="w-6 h-6 text-black" />
+                          Report
                         </button>
                       </div>
 
-                      {/* Replies */}
-                      {(c.replies || []).map((r) => (
-                        <div key={r._id} className="ml-6 mt-2 mb-2">
+                      <p className="text-gray-800 text-sm mb-3 line-clamp-2">
+                        {post.caption}
+                      </p>
+
+                      <div className="flex flex-wrap gap-4 text-gray-500 text-sm items-center">
+                        <button
+                          onClick={toggleLikePost}
+                          className="flex items-center gap-1 hover:opacity-70"
+                        >
+                          {hearted ? (
+                            <HeartIconSolid className="w-6 h-6 text-black fill-current" />
+                          ) : (
+                            <HeartIconOutline className="w-6 h-6 text-black" />
+                          )}
+                          <span>{post.likes.length} Likes</span>
+                        </button>
+                        <div className="flex items-center gap-1">
+                          <CommentIconOutline className="w-6 h-6 text-black" />
+                          <span>{comments.length} Comments</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Comments */}
+                  <div className="w-full lg:w-[480px] bg-sky-300 rounded-2xl p-4 flex flex-col h-[600px]">
+                    <h3 className="text-xl font-semibold mb-4">Comments</h3>
+
+                    {/* Scrollable Comment List */}
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+                      {comments.map((c) => (
+                        <div key={c._id} className="mb-2">
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                              <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                              <div className="relative w-6 h-6 rounded-full overflow-hidden">
                                 <Image
-                                  src={r.userAvatar || "https://api.dicebear.com/7.x/bottts/svg?seed=3"}
-                                  alt={r.userName}
+                                  src={
+                                    c.userAvatar ||
+                                    "https://api.dicebear.com/7.x/bottts/svg?seed=2"
+                                  }
+                                  alt={c.userName}
                                   fill
-                                  sizes="20px"
+                                  sizes="24px"
                                   className="object-cover"
                                   priority
                                 />
                               </div>
-                              <span className="font-semibold text-xs">{r.userName}</span>
+                              <span className="font-semibold text-sm">
+                                {c.userName}
+                              </span>
                             </div>
-                            <button
-                              onClick={() => openReport(r._id)}
-                              className="text-black hover:opacity-80"
-                            >
-                              <FlagIconOutline className="w-3 h-3" />
-                            </button>
+
+                            {/* ... vertical icon */}
+                            <div className="relative">
+                              <button
+                                onClick={() => openReport(c._id)}
+                                className="text-black hover:opacity-80"
+                              >
+                                <FlagIconOutline className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
-                          <p className="text-xs ml-7">{r.text}</p>
-                          <div className="flex gap-4 mt-1 ml-7 text-xs text-gray-700">
+
+                          <p className="text-sm">{c.text}</p>
+
+                          <div className="flex gap-4 mt-1 text-xs text-gray-700">
                             <button
-                              onClick={() => toggleLikeComment(r._id)}
+                              onClick={() => toggleLikeComment(c._id)}
                               className="flex items-center gap-1 hover:opacity-70"
                             >
-                              {(r.likes || []).includes("") ? (
-                                <HeartIconSolid className="w-4 h-4 text-black" />
+                              {(c.likes || []).includes("") ? (
+                                <HeartIconSolid className="w-5 h-5 text-black fill-current" />
                               ) : (
-                                <HeartIconOutline className="w-4 h-4 text-black" />
+                                <HeartIconOutline className="w-5 h-5 text-black" />
                               )}
-                              <span>{(r.likes || []).length}</span>
+                              <span>{(c.likes || []).length}</span>
+                            </button>
+                          </div>
+
+                          {/* Replies */}
+                          {(c.replies || []).map((r) => (
+                            <div key={r._id} className="ml-6 mt-2 mb-2">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                                    <Image
+                                      src={
+                                        r.userAvatar ||
+                                        "https://api.dicebear.com/7.x/bottts/svg?seed=3"
+                                      }
+                                      alt={r.userName}
+                                      fill
+                                      sizes="20px"
+                                      className="object-cover"
+                                      priority
+                                    />
+                                  </div>
+                                  <span className="font-semibold text-xs">
+                                    {r.userName}
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => openReport(r._id)}
+                                  className="text-black hover:opacity-80"
+                                >
+                                  <FlagIconOutline className="w-3 h-3" />
+                                </button>
+                              </div>
+                              <p className="text-xs ml-7">{r.text}</p>
+                              <div className="flex gap-4 mt-1 ml-7 text-xs text-gray-700">
+                                <button
+                                  onClick={() => toggleLikeComment(r._id)}
+                                  className="flex items-center gap-1 hover:opacity-70"
+                                >
+                                  {(r.likes || []).includes("") ? (
+                                    <HeartIconSolid className="w-4 h-4 text-black" />
+                                  ) : (
+                                    <HeartIconOutline className="w-4 h-4 text-black" />
+                                  )}
+                                  <span>{(r.likes || []).length}</span>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Reply Input */}
+                          <div className="mt-2 flex items-center ml-6 border rounded px-2 bg-white">
+                            <input
+                              type="text"
+                              placeholder="Reply..."
+                              className="flex-1 px-2 py-1 outline-none text-sm"
+                              value={replyText[c._id] || ""}
+                              onChange={(e) =>
+                                setReplyText((prev) => ({
+                                  ...prev,
+                                  [c._id]: e.target.value,
+                                }))
+                              }
+                            />
+                            <button
+                              onClick={() => submitReply(c._id)}
+                              className="p-1 text-sky-500"
+                            >
+                              <SendIcon className="w-4 h-4 text-black" />
                             </button>
                           </div>
                         </div>
                       ))}
-
-                      {/* Reply Input */}
-                      <div className="mt-2 flex items-center ml-6 border rounded px-2 bg-white">
-                        <input
-                          type="text"
-                          placeholder="Reply..."
-                          className="flex-1 px-2 py-1 outline-none text-sm"
-                          value={replyText[c._id] || ""}
-                          onChange={(e) =>
-                            setReplyText((prev) => ({
-                              ...prev,
-                              [c._id]: e.target.value,
-                            }))
-                          }
-                        />
-                        <button
-                          onClick={() => submitReply(c._id)}
-                          className="p-1 text-sky-500"
-                        >
-                          <SendIcon className="w-4 h-4 text-black" />
-                        </button>
-                      </div>
                     </div>
-                  ))}
-                </div>
 
-                {/* Input comment */}
-                <div className="mt-4 flex items-center border rounded px-2 bg-white">
-                  <input
-                    type="text"
-                    placeholder="Add a comment..."
-                    className="flex-1 px-2 py-1 outline-none"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                  />
-                  <button onClick={submitComment} className="p-2 text-sky-500">
-                    <SendIcon className="w-6 h-6 text-black" />
-                  </button>
+                    {/* Input comment */}
+                    <div className="mt-4 flex items-center border rounded px-2 bg-white">
+                      <input
+                        type="text"
+                        placeholder="Add a comment..."
+                        className="flex-1 px-2 py-1 outline-none"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                      />
+                      <button
+                        onClick={submitComment}
+                        className="p-2 text-sky-500"
+                      >
+                        <SendIcon className="w-6 h-6 text-black" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

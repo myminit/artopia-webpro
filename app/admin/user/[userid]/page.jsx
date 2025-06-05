@@ -126,12 +126,12 @@ export default function Adminuserid() {
 
       <div className="flex pt-[70px] h-screen">
         {/* Sidebar */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-48 bg-purple-400 z-40 shadow">
           <AdminNavbar />
         </div>
 
         {/* Main Content */}
-        <div className="ml-72 p-6 w-full">
+        <div className="ml-48 p-6 w-full">
           <button
             onClick={() => router.push("/admin/user")}
             className="text-black hover:opacity-70"
@@ -214,23 +214,31 @@ export default function Adminuserid() {
                       </td>
                       <td className="p-3">
                         <div className="flex justify-center space-x-2">
-                          <button 
+                          <button
                             title="Edit"
-                            onClick={() => router.push(`/admin/report/${report._id}`)}
+                            onClick={() =>
+                              router.push(`/admin/report/${report._id}`)
+                            }
                           >
                             <PencilIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
                           </button>
-                          <button 
+                          <button
                             title="Delete"
                             onClick={async () => {
-                              if (!confirm("ต้องการลบรายงานนี้หรือไม่?")) return;
+                              if (!confirm("ต้องการลบรายงานนี้หรือไม่?"))
+                                return;
                               try {
-                                const res = await fetch(`/api/admin/report/${report._id}`, {
-                                  method: "DELETE",
-                                  credentials: "include"
-                                });
+                                const res = await fetch(
+                                  `/api/admin/report/${report._id}`,
+                                  {
+                                    method: "DELETE",
+                                    credentials: "include",
+                                  }
+                                );
                                 if (res.ok) {
-                                  setReports(reports.filter(r => r._id !== report._id));
+                                  setReports(
+                                    reports.filter((r) => r._id !== report._id)
+                                  );
                                   alert("ลบรายงานสำเร็จ");
                                 } else {
                                   throw new Error("Failed to delete report");
@@ -277,7 +285,7 @@ export default function Adminuserid() {
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
                 {user?.status === "banned" ? (
-                  <button 
+                  <button
                     onClick={() => {
                       if (window.confirm("ต้องการปลดแบนผู้ใช้นี้หรือไม่?")) {
                         handleBanUpdate("unban");
@@ -290,9 +298,11 @@ export default function Adminuserid() {
                 ) : (
                   <>
                     <div className="flex items-center space-x-4">
-                      <label className="text-gray-600 whitespace-nowrap">ระยะเวลาแบน:</label>
-                      <select 
-                        value={banDuration} 
+                      <label className="text-gray-600 whitespace-nowrap">
+                        ระยะเวลาแบน:
+                      </label>
+                      <select
+                        value={banDuration}
                         onChange={(e) => setBanDuration(e.target.value)}
                         className="border rounded px-3 py-2"
                       >
@@ -305,9 +315,17 @@ export default function Adminuserid() {
                         <option value="permanent">ถาวร</option>
                       </select>
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
-                        if (window.confirm(`ต้องการแบนผู้ใช้นี้เป็นเวลา ${banDuration === 'permanent' ? 'ถาวร' : banDuration + ' วัน'} หรือไม่?`)) {
+                        if (
+                          window.confirm(
+                            `ต้องการแบนผู้ใช้นี้เป็นเวลา ${
+                              banDuration === "permanent"
+                                ? "ถาวร"
+                                : banDuration + " วัน"
+                            } หรือไม่?`
+                          )
+                        ) {
                           handleBanUpdate("ban");
                         }
                       }}
@@ -318,9 +336,13 @@ export default function Adminuserid() {
                   </>
                 )}
               </div>
-              <button 
+              <button
                 onClick={() => {
-                  if (window.confirm("ต้องการลบผู้ใช้นี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้")) {
+                  if (
+                    window.confirm(
+                      "ต้องการลบผู้ใช้นี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้"
+                    )
+                  ) {
                     handleDelete();
                   }
                 }}

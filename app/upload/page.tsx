@@ -86,13 +86,16 @@ export default function UploadPage() {
 
     <div className="flex pt-[70px] h-screen">
       {/* Navbar ด้านซ้าย */}
-      <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+      <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-48 bg-sky-400 z-40 shadow">
         <Navbar />
       </div>
 
-      <main className="ml-72 flex-1 overflow-y-auto px-6 py-4">
-        <div className="py-2 mx-auto">
-          <h1 className="text-4xl font-bold mb-6">Upload post</h1>
+      <main className="ml-48 flex-1 overflow-y-auto px-6 py-4">
+        <div className="py-2">
+          <h1 className="text-4xl font-bold mb-8 flex items-center gap-4 bg-gradient-to-r from-sky-600 to-blue-500 bg-clip-text text-transparent">
+            <ArrowUpTrayIcon className="w-10 h-10 mr-2 text-sky-400" />
+            Upload Post
+          </h1>
           
           {/* อย่า render form หรือ guest message เลยถ้า user === undefined */}
           {user === undefined ? (

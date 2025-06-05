@@ -49,8 +49,8 @@ export default function AdminNavbar() {
   ];
 
   return (
-    <nav className="w-72 h-[calc(100vh-70px)] bg-purple-400 text-white px-4 py-6 flex flex-col justify-between">
-      <div className="space-y-4">
+    <nav className="w-48 h-[calc(100vh-70px)] bg-purple-400 text-white px-2 py-4 flex flex-col justify-between">
+      <div className="space-y-2">
         {navItems.map((item) => {
           const isActive =
             activePath === item.href || activePath.startsWith(item.href + "/");        
@@ -58,13 +58,13 @@ export default function AdminNavbar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm transition ${
                 isActive
                   ? "bg-white text-purple-700 font-medium"
                   : "hover:bg-purple-600/70"
               }`}
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon className="w-4 h-4" />
               <span>{item.name}</span>
             </Link>
           );
@@ -74,9 +74,9 @@ export default function AdminNavbar() {
       <div>
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-2 px-4 py-2 text-white hover:bg-purple-600/70 rounded-lg transition w-full"
+          className="flex items-center space-x-2 px-3 py-2 text-white hover:bg-purple-600/70 rounded-md text-sm transition w-full"
         >
-          <ArrowRightOnRectangleIcon className="w-5 h-5" />
+          <ArrowRightOnRectangleIcon className="w-4 h-4" />
           <span>Logout</span>
         </button>
       </div>

@@ -83,12 +83,12 @@ export default function AdminReportid() {
 
       <div className="flex pt-[70px] h-screen">
         {/* Sidebar */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-44 bg-purple-400 z-40 shadow">
           <AdminNavbar />
         </div>
 
         {/* Main Content */}
-        <div className="ml-72 p-6 w-full">
+        <div className="ml-56 p-6 w-full">
           <button
             onClick={() => router.push("/admin/report")}
             className="text-black hover:opacity-70"

@@ -75,12 +75,12 @@ export default function Adminuser() {
       {/* Sidebar + Main */}
       <div className="flex pt-[70px] h-screen">
         {/* Sidebar */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-48 bg-purple-400 z-40 shadow">
           <AdminNavbar />
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 ml-72 p-6 overflow-y-auto">
+        <div className="flex-1 ml-48 p-6 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-purple-500">Admin Users</h1>
             {/* Search bar */}
@@ -111,16 +111,16 @@ export default function Adminuser() {
                 </tr>
               </thead>
               <tbody>
-                {users.filter(u => {
-                    // กรองโดยดูชื่อหรืออีเมลให้ตรงกับ searchTerm (ไม่คำนึงตัวพิมพ์ใหญ่/เล็ก)
-                    const term = searchTerm.trim().toLowerCase();
-                    if (!term) return true;
-                    return (
-                      u.name.toLowerCase().includes(term) ||
-                      u.email.toLowerCase().includes(term) ||
-                      u._id.toLowerCase().includes(term)
-                    );
-                  }).length === 0 ? (
+                {users.filter((u) => {
+                  // กรองโดยดูชื่อหรืออีเมลให้ตรงกับ searchTerm (ไม่คำนึงตัวพิมพ์ใหญ่/เล็ก)
+                  const term = searchTerm.trim().toLowerCase();
+                  if (!term) return true;
+                  return (
+                    u.name.toLowerCase().includes(term) ||
+                    u.email.toLowerCase().includes(term) ||
+                    u._id.toLowerCase().includes(term)
+                  );
+                }).length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-4">
                       ไม่มีผู้ใช้งานในระบบ
@@ -128,7 +128,7 @@ export default function Adminuser() {
                   </tr>
                 ) : (
                   users
-                    .filter(u => {
+                    .filter((u) => {
                       const term = searchTerm.trim().toLowerCase();
                       if (!term) return true;
                       return (
@@ -138,25 +138,25 @@ export default function Adminuser() {
                       );
                     })
                     .map((user) => (
-                    <tr key={user._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2">{user._id}</td>
-                      <td className="px-4 py-2">{user.name}</td>
-                      <td className="px-4 py-2">{user.email}</td>
-                      <td className="px-4 py-2">
-                        {new Date(user.updatedAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-2 flex space-x-2">
-                        <PencilIcon
-                          className="h-5 w-5 text-blue-500 cursor-pointer"
-                          onClick={() => handleEdit(user)}
-                        />
-                        <TrashIcon
-                          className="h-5 w-5 text-red-500 cursor-pointer"
-                          onClick={() => handleDelete(user._id)}
-                        />
-                      </td>
-                    </tr>
-                  ))
+                      <tr key={user._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{user._id}</td>
+                        <td className="px-4 py-2">{user.name}</td>
+                        <td className="px-4 py-2">{user.email}</td>
+                        <td className="px-4 py-2">
+                          {new Date(user.updatedAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-2 flex space-x-2">
+                          <PencilIcon
+                            className="h-5 w-5 text-blue-500 cursor-pointer"
+                            onClick={() => handleEdit(user)}
+                          />
+                          <TrashIcon
+                            className="h-5 w-5 text-red-500 cursor-pointer"
+                            onClick={() => handleDelete(user._id)}
+                          />
+                        </td>
+                      </tr>
+                    ))
                 )}
               </tbody>
             </table>

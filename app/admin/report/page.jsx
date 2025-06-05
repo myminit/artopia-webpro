@@ -84,12 +84,12 @@ export default function AdminReports() {
       {/* Sidebar + Main */}
       <div className="flex pt-[70px] h-screen">
         {/* Sidebar */}
-        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-72 bg-sky-400 z-40 shadow">
+        <div className="fixed top-[70px] left-0 h-[calc(100vh-70px)] w-44 bg-purple-400 z-40 shadow">
           <AdminNavbar />
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 ml-72 p-6 overflow-y-auto">
+        <div className="flex-1 ml-56 p-6 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-purple-500">
               Admin User Reports
