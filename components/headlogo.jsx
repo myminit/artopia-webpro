@@ -1,4 +1,4 @@
-// components/headLogo.jsx
+// File: components/headLogo.jsx
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -10,9 +10,9 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function HeadLogo() {
-  // ลบ type annotation ออก ให้เหลือแค่ useState(null)
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // สำหรับเก็บข้อความที่ค้นหา
   const router = useRouter();
 
   useEffect(() => {
@@ -44,6 +44,25 @@ export default function HeadLogo() {
     }
   };
 
+  // เมื่อกด Enter ในช่องค้นหา
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const query = searchTerm.trim();
+      if (query) {
+        router.push(`/community?search=${encodeURIComponent(query)}`);
+      }
+    }
+  };
+
+  // เมื่อคลิกปุ่มแว่นขยาย
+  const handleSearchClick = () => {
+    const query = searchTerm.trim();
+    if (query) {
+      router.push(`/community?search=${encodeURIComponent(query)}`);
+    }
+  };
+
   return (
     <header className="relative flex items-center justify-between px-8 py-4 bg-sky-400 shadow-sm">
       {/* Logo + Title */}
@@ -55,11 +74,16 @@ export default function HeadLogo() {
       {/* Search bar */}
       <div className="flex-1 mx-6">
         <div className="flex items-center bg-gray-100 px-4 py-2 rounded-full max-w-xl w-full mx-auto">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-500 mr-2" />
+          <button onClick={handleSearchClick}>
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-500 mr-2 cursor-pointer" />
+          </button>
           <input
             type="text"
-            placeholder="Search ..."
+            placeholder="Search posts..."
             className="bg-transparent outline-none text-sm w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
           />
         </div>
       </div>
@@ -72,7 +96,6 @@ export default function HeadLogo() {
         >
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 rounded-full overflow-hidden">
-              {/* ใช้ไฟล์ PNG/Fallback จาก /public/img/user.png */}
               <Image
                 src={user?.avatar || "/img/user.png"}
                 alt="User Profile"
