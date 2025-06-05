@@ -15,6 +15,7 @@ export default function AdminReports() {
   const router = useRouter();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(""); // state สำหรับ Search
 
   useEffect(() => {
     async function fetchReports() {
@@ -43,7 +44,6 @@ export default function AdminReports() {
   const handleDelete = (id) => {
     if (!confirm("ต้องการลบรายงานนี้จริงหรือไม่?")) return;
 
-    // เรียก API ลบรายงาน (ต้องเขียน DELETE API ด้วย)
     fetch(`/api/admin/report/${id}`, {
       method: "DELETE",
       credentials: "include",
@@ -63,7 +63,17 @@ export default function AdminReports() {
     router.push(`/admin/report/${report._id}`);
   };
 
-  
+  // ฟังก์ชันกรองรายการรายงานตาม searchTerm
+  const filteredReports = reports.filter((r) => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return true;
+    return (
+      r._id.toLowerCase().includes(term) ||
+      r.byUserId.toLowerCase().includes(term) ||
+      r.reportUserId.toLowerCase().includes(term)
+    );
+  });
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -82,7 +92,7 @@ export default function AdminReports() {
         <div className="flex-1 ml-72 p-6 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-purple-500">
-              Admin Users Reports
+              Admin User Reports
             </h1>
             <div className="flex-1 mx-6">
               <div className="flex items-center bg-gray-100 px-4 py-2 rounded-full max-w-xl w-full mx-auto">
@@ -91,6 +101,8 @@ export default function AdminReports() {
                   type="text"
                   placeholder="Search ..."
                   className="bg-transparent outline-none text-sm w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
@@ -109,14 +121,14 @@ export default function AdminReports() {
                 </tr>
               </thead>
               <tbody>
-                {reports.length === 0 ? (
+                {filteredReports.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-4">
-                      ไม่มีรายงานผู้ใช้งานในระบบ
+                      ไม่พบรายงานตามผลการค้นหา
                     </td>
                   </tr>
                 ) : (
-                  reports.map((report) => (
+                  filteredReports.map((report) => (
                     <tr key={report._id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{report._id}</td>
                       <td className="px-4 py-2">{report.byUserId}</td>

@@ -17,6 +17,7 @@ export default function Adminuser() {
   const router = useRouter();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     async function fetchUsers() {
@@ -90,6 +91,8 @@ export default function Adminuser() {
                   type="text"
                   placeholder="Search ..."
                   className="bg-transparent outline-none text-sm w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
@@ -108,14 +111,33 @@ export default function Adminuser() {
                 </tr>
               </thead>
               <tbody>
-                {users.length === 0 ? (
+                {users.filter(u => {
+                    // กรองโดยดูชื่อหรืออีเมลให้ตรงกับ searchTerm (ไม่คำนึงตัวพิมพ์ใหญ่/เล็ก)
+                    const term = searchTerm.trim().toLowerCase();
+                    if (!term) return true;
+                    return (
+                      u.name.toLowerCase().includes(term) ||
+                      u.email.toLowerCase().includes(term) ||
+                      u._id.toLowerCase().includes(term)
+                    );
+                  }).length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-4">
                       ไม่มีผู้ใช้งานในระบบ
                     </td>
                   </tr>
                 ) : (
-                  users.map((user, index) => (
+                  users
+                    .filter(u => {
+                      const term = searchTerm.trim().toLowerCase();
+                      if (!term) return true;
+                      return (
+                        u.name.toLowerCase().includes(term) ||
+                        u.email.toLowerCase().includes(term) ||
+                        u._id.toLowerCase().includes(term)
+                      );
+                    })
+                    .map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{user._id}</td>
                       <td className="px-4 py-2">{user.name}</td>
