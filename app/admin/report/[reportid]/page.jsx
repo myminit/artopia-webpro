@@ -1,32 +1,19 @@
-"use client";
+// File: app/admin/report/[reportid]/page.jsx
+'use client';
+
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; 
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import AdminHeadLogo from "@/components/admin/adminheadlogo";
 import AdminNavbar from "@/components/admin/adminnavbar";
-import {
-  ArrowLeftIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
-
-export default function AdminReportid() {
+export default function AdminReportDetail() {
   const params = useParams();
   const reportId = params.reportid;
   const router = useRouter();
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
-  /*const [report] = useState({
-    id: reportId,
-    byUserId: 1,
-    reportUserId: 1,
-    lastUpdate: "24 Jun 2025",
-    reason: "",
-    detail: "",
-  });
 
-  const handleDelete = () => {
-    console.log("Deleting report:", report.id);
-  };*/
   useEffect(() => {
     async function fetchReport() {
       try {
@@ -72,7 +59,21 @@ export default function AdminReportid() {
     }
   };
 
-  if (!report) return <p>ไม่พบรายงาน</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
+      </div>
+    );
+  }
+
+  if (!report) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-red-500">ไม่พบรายงาน</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -91,64 +92,82 @@ export default function AdminReportid() {
         <div className="ml-56 p-6 w-full">
           <button
             onClick={() => router.push("/admin/report")}
-            className="text-black hover:opacity-70"
+            className="mb-4 flex items-center text-black hover:opacity-70"
           >
-            <ArrowLeftIcon className="w-6 h-6" />
+            <ArrowLeftIcon className="w-6 h-6 mr-2" />
           </button>
-          <h1 className="text-lg font-bold text-purple-500 mb-4">
+          <h1 className="text-2xl font-bold text-purple-500 mb-6">
             Admin Users Reports
           </h1>
 
           <div className="bg-white rounded-xl p-6 shadow">
-            <p>
-              <span className="inline-block min-w-[150px] text-gray-500">
-                Report ID
-              </span>
-              {report.id}
-            </p>
-            <p>
-              <span className="inline-block min-w-[150px] text-gray-500">
-                By User ID
-              </span>
-              {report.byUserId}
-            </p>
-            <p>
-              <span className="inline-block min-w-[150px] text-gray-500">
-                Report User ID
-              </span>
-              {report.reportUserId}
-            </p>
-            <p>
-              <span className="inline-block min-w-[150px] text-gray-500">
-                Last Update
-              </span>
-              {report.lastUpdate}
-            </p>
+            {/* Report ID */}
+            <div className="flex mb-2">
+              <span className="inline-block w-36 text-gray-500">Report ID:</span>
+              <span className="text-black">{report._id}</span>
+            </div>
 
-            <div className="mt-4">
+            {/* By User ID */}
+            <div className="flex mb-2">
+              <span className="inline-block w-36 text-gray-500">By User ID:</span>
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => router.push(`/admin/user/${report.byUserId}`)}
+              >
+                {report.byUserId}
+              </span>
+            </div>
+
+            {/* Report User ID */}
+            <div className="flex mb-2">
+              <span className="inline-block w-36 text-gray-500">
+                Report User ID:
+              </span>
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() =>
+                  router.push(`/admin/user/${report.reportUserId}`)
+                }
+              >
+                {report.reportUserId}
+              </span>
+            </div>
+
+            {/* Last Update / Date */}
+            <div className="flex mb-4">
+              <span className="inline-block w-36 text-gray-500">Date/Time:</span>
+              <span className="text-black">
+                {new Date(report.updatedAt).toLocaleString()}
+              </span>
+            </div>
+
+            {/* Reason for report */}
+            <div className="mb-4">
               <label className="block mb-1 text-sm text-gray-700">
                 Reason for report
               </label>
               <input
                 type="text"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded px-3 py-2 bg-gray-50"
                 value={report.reason}
                 readOnly
               />
             </div>
 
-            <div className="mt-4">
+            {/* Detail report */}
+            <div className="mb-6">
               <label className="block mb-1 text-sm text-gray-700">
                 Detail report
               </label>
               <textarea
-                className="w-full border rounded px-3 py-2 h-32"
+                className="w-full border rounded px-3 py-2 h-32 bg-gray-50"
                 value={report.detail}
                 readOnly
               />
             </div>
 
-            <div className="mt-6">
+            {/* Delete Button */}
+            <div className="mt-4">
               <button
                 onClick={handleDelete}
                 className="bg-red-600 text-white font-semibold px-6 py-2 rounded hover:bg-red-700"
