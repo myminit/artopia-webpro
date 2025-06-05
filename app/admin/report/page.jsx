@@ -89,7 +89,7 @@ export default function AdminReports() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 ml-56 p-6 overflow-y-auto">
+        <div className="flex-1 ml-48 p-6 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-purple-500">
               Admin User Reports
@@ -109,7 +109,7 @@ export default function AdminReports() {
           </div>
 
           {/* Report Table */}
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="bg-white shadow rounded-lg overflow-hidden mt-4">
             <table className="min-w-full text-sm text-left">
               <thead className="bg-gray-100 text-gray-700">
                 <tr>

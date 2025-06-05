@@ -1,5 +1,5 @@
 // File: app/admin/user/[userid]/page.jsx
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -44,7 +44,9 @@ export default function AdminUserDetail() {
 
         if (reportsRes.ok) {
           const reportsData = await reportsRes.json();
-          const userReports = reportsData.filter((r) => r.reportUserId === userId);
+          const userReports = reportsData.filter(
+            (r) => r.reportUserId === userId
+          );
           setReports(userReports);
         }
       } catch (err) {
@@ -146,7 +148,9 @@ export default function AdminUserDetail() {
           >
             <ArrowLeftIcon className="w-6 h-6" />
           </button>
-          <h1 className="text-2xl font-bold text-purple-500 mb-6">Admin Users</h1>
+          <h1 className="text-2xl font-bold text-purple-500 mb-6">
+            Admin Users
+          </h1>
 
           {/* User Info */}
           <div className="bg-white rounded-xl p-6 shadow mb-8">
@@ -156,7 +160,7 @@ export default function AdminUserDetail() {
                   <span className="inline-block min-w-[120px] text-gray-400">
                     User ID:
                   </span>
-                    {user._id}
+                  {user._id}
                 </p>
                 <p>
                   <span className="inline-block min-w-[120px] text-gray-400">
@@ -184,7 +188,9 @@ export default function AdminUserDetail() {
                   </span>
                   <span
                     className={`font-semibold ${
-                      user.status === "banned" ? "text-red-500" : "text-green-500"
+                      user.status === "banned"
+                        ? "text-red-500"
+                        : "text-green-500"
                     }`}
                   >
                     {user.status}
@@ -202,7 +208,9 @@ export default function AdminUserDetail() {
 
           {/* Reports Table */}
           <div className="bg-white rounded-xl p-4 shadow mb-8">
-            <h2 className="font-semibold text-sky-500 mb-4">List Users Reports</h2>
+            <h2 className="font-semibold text-sky-500 mb-4">
+              List Users Reports
+            </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100 text-gray-700">
@@ -223,10 +231,15 @@ export default function AdminUserDetail() {
                     </tr>
                   )}
                   {reports.map((report) => (
-                    <tr key={report._id} className="text-center hover:bg-gray-50">
+                    <tr
+                      key={report._id}
+                      className="text-center hover:bg-gray-50"
+                    >
                       <td className="p-3">
                         <span
-                          onClick={() => router.push(`/admin/report/${report._id}`)}
+                          onClick={() =>
+                            router.push(`/admin/report/${report._id}`)
+                          }
                           className="cursor-pointer text-blue-600 hover:underline"
                         >
                           {report._id}
@@ -234,7 +247,9 @@ export default function AdminUserDetail() {
                       </td>
                       <td className="p-3">
                         <span
-                          onClick={() => router.push(`/admin/user/${report.byUserId}`)}
+                          onClick={() =>
+                            router.push(`/admin/user/${report.byUserId}`)
+                          }
                           className="cursor-pointer text-blue-600 hover:underline"
                         >
                           {report.byUserId}
@@ -247,7 +262,6 @@ export default function AdminUserDetail() {
                       <td className="p-3">
                         <div className="flex justify-center space-x-2">
                           <button
-                          <button
                             title="Edit"
                             onClick={() =>
                               router.push(`/admin/report/${report._id}`)
@@ -256,19 +270,11 @@ export default function AdminUserDetail() {
                             <PencilIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
                           </button>
                           <button
-                          <button
                             title="Delete"
                             onClick={async () => {
                               if (!confirm("ต้องการลบรายงานนี้หรือไม่?"))
                                 return;
                               try {
-                                const res = await fetch(
-                                  `/api/admin/report/${report._id}`,
-                                  {
-                                    method: "DELETE",
-                                    credentials: "include",
-                                  }
-                                );
                                 const res = await fetch(
                                   `/api/admin/report/${report._id}`,
                                   {
@@ -337,11 +343,6 @@ export default function AdminUserDetail() {
                       </label>
                       <select
                         value={banDuration}
-                      <label className="text-gray-600 whitespace-nowrap">
-                        ระยะเวลาแบน:
-                      </label>
-                      <select
-                        value={banDuration}
                         onChange={(e) => setBanDuration(e.target.value)}
                         className="border rounded px-3 py-2"
                       >
@@ -354,7 +355,6 @@ export default function AdminUserDetail() {
                         <option value="permanent">ถาวร</option>
                       </select>
                     </div>
-                    <button
                     <button
                       onClick={() => {
                         if (
@@ -376,7 +376,6 @@ export default function AdminUserDetail() {
                   </>
                 )}
               </div>
-              <button
               <button
                 onClick={() => {
                   if (
