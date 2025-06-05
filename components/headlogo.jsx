@@ -131,7 +131,7 @@ export default function HeadLogo() {
                     </div>
                     <div className="text-sm text-gray-500">{user.email}</div>
                     <div className="text-xs text-gray-400 mt-1 italic">
-                      Passionate about Art 🎨
+                      {user.bio || "Passionate about Art 🎨"}
                     </div>
                   </div>
                 </div>
