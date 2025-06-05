@@ -116,7 +116,7 @@ export default function AdminReports() {
                   <th className="px-4 py-2">Report ID</th>
                   <th className="px-4 py-2">By User ID</th>
                   <th className="px-4 py-2">Report User ID</th>
-                  <th className="px-4 py-2">Last update</th>
+                  <th className="px-4 py-2">Date</th>
                   <th className="px-4 py-2">Action</th>
                 </tr>
               </thead>
@@ -131,8 +131,22 @@ export default function AdminReports() {
                   filteredReports.map((report) => (
                     <tr key={report._id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{report._id}</td>
-                      <td className="px-4 py-2">{report.byUserId}</td>
-                      <td className="px-4 py-2">{report.reportUserId}</td>
+                      <td className="p-3">
+                        <span
+                          onClick={() => router.push(`/admin/user/${report.byUserId}`)}
+                          className="cursor-pointer text-blue-600 hover:underline"
+                        >
+                          {report.byUserId}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span
+                          onClick={() => router.push(`/admin/user/${report.reportUserId}`)}
+                          className="cursor-pointer text-blue-600 hover:underline"
+                        >
+                          {report.byUserId}
+                        </span>
+                      </td>
                       <td className="px-4 py-2">
                         {new Date(report.updatedAt).toLocaleDateString()}
                       </td>
